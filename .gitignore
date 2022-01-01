@@ -1,0 +1,18 @@
+# Artifacts
+node_modules
+/dist
+/undecaf-*.tgz
+
+# Editor directories and files
+.idea
+.vscode
+.run
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Test results
+/coverage
+/screenshots

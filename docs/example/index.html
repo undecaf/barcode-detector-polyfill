@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, minimum-scale=0.9">
+
+  <title>BarcodeDetector polyfill example</title>
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+
+  <style>
+      .container {
+          margin-top: 1em;
+      }
+
+      h5, p {
+          margin-top: 0.5em;
+      }
+
+      label {
+          display: inline-block;
+      }
+
+      .viewport {
+          display: inline-block;
+          position: relative;
+      }
+
+      img, video, #note {
+          display: none;
+          max-width: 100%;
+      }
+
+      #imgUrl {
+          width: 25em;
+          max-width: 100%;
+      }
+
+      #imgUrl.active {
+          color: #ffffff;
+          background-color: #33C3F0;
+      }
+
+      #imgUrl.active ~ .viewport > #img,
+      #imgUrl.active ~ #note,
+      #imgBtn.button-primary ~ .viewport > #img,
+      #videoBtn.button-primary ~ .viewport > #video {
+          display: block;
+      }
+
+      #canvas {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+      }
+
+      #encoding {
+          margin-right: 1em;
+      }
+
+      pre {
+          font-size: 1.35rem;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+      }
+  </style>
+
+  <script type="module" src="js/main.js"></script>
+</head>
+
+<body>
+<div class="container">
+  <h4><code>BarcodeDetector</code> polyfill example</h4>
+
+  <div>Supported formats: <pre id="formats"></pre></p>
+
+  <h5>Image source</h5>
+
+  <input id="fileInput" type="file" style="display: none;" accept="image/*">
+
+  <input id="imgUrl" type="url" placeholder="Paste an image URL then click outside" required>
+  <button id="imgBtn">Image file</button>
+  <button id="videoBtn">Camera</button>
+
+  <select id="encoding">
+    <option value="utf-8" selected>UTF-8</option>
+    <option value="iso-8859-15">ISO-8859-15</option>
+    <option value="windows-1252">Windows-1252</option>
+    <option value="macintosh">Macintosh</option>
+  </select>
+
+  <label>
+    <input id="details" type="checkbox">
+    <span class="label-body">Show details</span>
+  </label>
+
+  <div class="viewport">
+    <canvas id="canvas"></canvas>
+    <img id="img" crossorigin="anonymous">
+    <video id="video" autoplay></video>
+  </div>
+
+  <p id="note">If the image does not appear then loading may have been blocked by the server's CORS policy.</p>
+
+  <h5>Result</h5>
+
+  <pre id="result"></pre>
+</div>
+</body>
+</html>

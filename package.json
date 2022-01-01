@@ -1,0 +1,78 @@
+{
+  "name": "@undecaf/barcode-detector-polyfill",
+  "version": "0.9.5",
+  "description": "A WebAssembly polyfill for the Barcode Detection API",
+  "keywords": [
+    "polyfill",
+    "barcode",
+    "qrcode",
+    "zbar",
+    "wasm",
+    "webassembly"
+  ],
+  "author": "F. Kasper <fkasper@modus-operandi.at>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/undecaf/barcode-detector-polyfill/issues"
+  },
+  "homepage": "https://github.com/undecaf/barcode-detector-polyfill#readme",
+  "module": "dist/main.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "script": "./dist/index.js",
+      "default": "./dist/main.js"
+    },
+    "./zbar-wasm": {
+      "require": "./dist/zbar-wasm.meta.cjs",
+      "default": "./dist/zbar-wasm.meta.js"
+    }
+  },
+  "types": "./dist/main.d.ts",
+  "typings": "./dist/main.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/undecaf/barcode-detector-polyfill"
+  },
+  "files": [
+    "dist/*.js",
+    "dist/*.cjs",
+    "dist/*.d.ts"
+  ],
+  "scripts": {
+    "prebuild": "rimraf dist/*",
+    "build": "rollup --config rollup.config.js",
+    "test:unit": "karma start ./karma.conf.cjs",
+    "test:unit:debug": "karma start --browsers Chromium --no-single-run ./karma.conf.cjs",
+    "npm:audit": "npm audit --production"
+  },
+  "dependencies": {
+    "@undecaf/zbar-wasm": "^0.9.5"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.1.1",
+    "@rollup/plugin-replace": "^3.0.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "chai": "^4.3.4",
+    "karma": "^6.3.9",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-firefox-launcher": "^2.1.0",
+    "karma-mocha": "^2.0.1",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-rollup-preprocessor": "^7.0.7",
+    "karma-sourcemap-loader": "^0.3.8",
+    "mocha": "^8.3.2",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.60.1",
+    "rollup-plugin-license": "^2.6.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-ts": "^2.0.4",
+    "ts-node": "^10.4.0",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.4"
+  }
+}
