@@ -7,7 +7,7 @@
 ![License](https://badgen.net/github/license/undecaf/barcode-detector-polyfill)
 
 This package polyfills the [Barcode Detection API](https://developer.mozilla.org/en-US/docs/Web/API/Barcode_Detection_API) for browsers,
-using a [WebAssembly build](https://github.com/undecaf/zbar.wasm#readme) of the 
+using a [WebAssembly build](https://github.com/undecaf/zbar-wasm#readme) of the 
 [ZBar Bar Code Reader](https://github.com/mchehab/zbar#readme) that is written in C/C++.
 It offers the following features:
 
@@ -17,7 +17,7 @@ It offers the following features:
   `qr_code`, `sq_code`, `upc_a`, `upc_e`
 + Not supported: `aztec`, `data_matrix`, `pdf417`
 + Scans `<img>`, `<video>` and `<canvas>` elements, `Blob` and `File` instances and more
-+ Avoids the LGPL license obligation of the [`@undecaf/zbar-wasm`](https://github.com/undecaf/zbar-wasm) dependency
++ Avoids the LGPL license obligation of the [`@undecaf/zbar-wasm`](https://www.npmjs.com/package/@undecaf/zbar-wasm) dependency
   by loading it at runtime as a library
 + Outperforms pure JavaScript polyfills
 
@@ -80,7 +80,7 @@ const formats = await BarcodeDetector.getSupportedFormats()
 const detector = new BarcodeDetector({ formats: ['code_39', 'code_128', 'ean_13'] })
 ```
 
-if `formats` is omitted then all supported formats will be recognized.
+If `formats` is omitted then all supported formats will be recognized.
 
 Where applicable (e.g. `'qr_code'`), text is assumed to be UTF-8 encoded. A different encoding can be set for the `BarcodeDetectorPolyfill`:
 
@@ -142,7 +142,8 @@ are provided in `@undecaf/barcode-detector-polyfill/dist/main.d.ts`.
 
 ## Bundling
 
-This package, `@undecaf/barcode-detector-polyfill`, is under the MIT license, but it depends on `@undecaf/zbar-wasm`
+This package, [`@undecaf/barcode-detector-polyfill`](https://www.npmjs.com/package/@undecaf/barcode-detector-polyfill),
+is under the MIT license, but it depends on [`@undecaf/zbar-wasm`](https://www.npmjs.com/package/@undecaf/zbar-wasm)
 which is under LGPL.
 In order to comply with the LGPL, this dependency must not be bundled but may only be loaded as a library at runtime.
 
@@ -151,7 +152,7 @@ a different endpoint if desired.
 
 Bundlers must be configured so that they treat `@undecaf/zbar-wasm` as an external dependency instead of trying to resolve it.
 Sample build configurations for [Rollup](https://rollupjs.org/) and [esbuild](https://esbuild.github.io/)
-can be found in the [`examples`](https://github.com/undecaf/barcode-detector-polyfill/tree/master/example) directory.
+can be found in the [`example`](https://github.com/undecaf/barcode-detector-polyfill/tree/master/example) directory.
 They were used to bundle the JavaScript code for the [online example](https://undecaf.github.io/barcode-detector-polyfill/example/)
 in [`docs/example`](https://github.com/undecaf/barcode-detector-polyfill/tree/master/docs/example).
 They also illustrate how to load `@undecaf/zbar-wasm` from a non-default endpoint.
