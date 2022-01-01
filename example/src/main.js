@@ -118,16 +118,22 @@ el.imgBtn.addEventListener('click', event => {
 
 
 el.videoBtn.addEventListener('click', event => {
-    navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: 'environment' } })
-        .then(stream => {
-            el.imgUrl.className = el.imgBtn.className = ''
-            el.videoBtn.className = 'button-primary'
+    if (!timeoutId) {
+        navigator.mediaDevices.getUserMedia({audio: false, video: {facingMode: 'environment'}})
+            .then(stream => {
+                el.imgUrl.className = el.imgBtn.className = ''
+                el.videoBtn.className = 'button-primary'
 
-            el.video.srcObject = stream
-            detectVideo()
-        })
-        .catch(error => {
-            el.result.innerText = JSON.stringify(error)
-            cameraInput.checked = false
-        })
+                el.video.srcObject = stream
+                detectVideo()
+            })
+            .catch(error => {
+                el.result.innerText = JSON.stringify(error)
+            })
+
+    } else {
+        el.imgUrl.className = el.imgBtn.className = el.videoBtn.className = ''
+
+        detectVideo(false)
+    }
 })
