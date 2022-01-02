@@ -1,10 +1,10 @@
 {
-  "name": "@undecaf/barcode-detector-polyfill-examples",
+  "name": "@undecaf/barcode-detector-polyfill-example",
   "version": "0.9.6",
   "type": "module",
   "scripts": {
     "build:esbuild": "node esbuild.config.js",
-    "build:rollup": "node_modules/.bin/rollup --config rollup.config.js"
+    "build:rollup": "npx rollup --config rollup.config.js"
   },
   "author": "F. Kasper <fkasper@modus-operandi.at>",
   "license": "MIT",
