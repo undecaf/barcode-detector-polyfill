@@ -16,7 +16,7 @@ It offers the following features:
   `ean_8`, `ean_13`, `ean_13+2`, `ean_13+5`, `isbn_10`, `isbn_13`, `isbn_13+2`, `isbn_13+5`, `itf`,
   `qr_code`, `sq_code`, `upc_a`, `upc_e`
 + Not supported: `aztec`, `data_matrix`, `pdf417`
-+ Scans `<img>`, `<video>` and `<canvas>` elements, `Blob` and `File` instances and more
++ Scans `<img>`, `<canvas>` and live `<video>` elements, `Blob` and `File` instances and more
 + Avoids the LGPL license obligation of the [`@undecaf/zbar-wasm`](https://www.npmjs.com/package/@undecaf/zbar-wasm) dependency
   by loading it at runtime as a library
 + Outperforms pure JavaScript polyfills
@@ -42,7 +42,9 @@ Make the polyfill available if necessary:
 ```javascript
 import { BarcodeDetectorPolyfill } from '@undecaf/barcode-detector-polyfill'
 
-if (typeof window['BarcodeDetector'] === 'undefined' || !new window['BarcodeDetector']()) {
+try {
+    new window['BarcodeDetector']()
+} catch {
     window['BarcodeDetector'] = BarcodeDetectorPolyfill
 }
     ⁝
@@ -51,13 +53,15 @@ if (typeof window['BarcodeDetector'] === 'undefined' || !new window['BarcodeDete
 
 ### In a plain `<script>`
 
-Expose the `BarcodeDetector` API in variable `barcodeDetectorPolyfill`:
+Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill/dist/index.js"></script>
 <script>
-    if (typeof window['BarcodeDetector'] === 'undefined' || !new window['BarcodeDetector']()) {
-       window['BarcodeDetector'] = barcodeDetectorPolyfill.BarcodeDetectorPolyfill
+    try {
+      new window['BarcodeDetector']()
+    } catch {
+      window['BarcodeDetector'] = barcodeDetectorPolyfill.BarcodeDetectorPolyfill
     }
       ⁝
 </script>
@@ -80,9 +84,11 @@ const formats = await BarcodeDetector.getSupportedFormats()
 const detector = new BarcodeDetector({ formats: ['code_39', 'code_128', 'ean_13'] })
 ```
 
-If `formats` is omitted then all supported formats will be recognized.
+If `formats` is omitted then all supported formats will be detected.
 
-Where applicable (e.g. `'qr_code'`), text is assumed to be UTF-8 encoded. A different encoding can be set for the `BarcodeDetectorPolyfill`:
+<a name="encoding"></a>
+Where applicable (e.g. format `'qr_code'`), text is assumed to be UTF-8 encoded. As an extension to the
+`BarcodeDetector` API, a different encoding can be set for the `BarcodeDetectorPolyfill`:
 
 ```javascript
 const detector = new BarcodeDetectorPolyfill({ 
@@ -117,11 +123,12 @@ const barcodes = await detector.detect(source)
 The detector processes the `source` in its natural size, making detection results independent of the size rendered
 by the browser.
 
-Detected barcodes are stored as an array of objects in `barcodes`. Each object has the following properties
+Detected barcodes are stored as an array of objects in `barcodes` since `source` may contain multiple barcodes.
+Each object has the following properties
 ([see here for details](https://developer.mozilla.org/en-US/docs/Web/API/BarcodeDetector/detect#return_value)):
 
-+ `format`: the detected barcode format (one of the supported formats)
-+ `rawValue`: the decoded barcode, always a `string`
++ `format`: the detected barcode format (one of the formats specified as constructor options)
++ `rawValue`: the decoded barcode, always a `string` decoded from raw data [as specified](#encoding)
 + `boundingBox`: the [`DOMRectReadOnly`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly) enclosing the
   barcode in the `source`
 + `cornerPoints`: an arry of four `{x, y}` pairs in clockwise order, representing four corner points of the detected barcode.
@@ -143,11 +150,11 @@ are provided in `@undecaf/barcode-detector-polyfill/dist/main.d.ts`.
 ## Bundling
 
 This package, [`@undecaf/barcode-detector-polyfill`](https://www.npmjs.com/package/@undecaf/barcode-detector-polyfill),
-is under the MIT license, but it depends on [`@undecaf/zbar-wasm`](https://www.npmjs.com/package/@undecaf/zbar-wasm)
+is under the MIT license although it depends on [`@undecaf/zbar-wasm`](https://www.npmjs.com/package/@undecaf/zbar-wasm)
 which is under LGPL.
-In order to comply with the LGPL, this dependency must not be bundled but may only be loaded as a library at runtime.
 
-By default, `@undecaf/zbar-wasm` will be loaded from `https://cdn.jsdelivr.net`, but it can also be fetched from
+In order to comply with the LGPL, `@undecaf/zbar-wasm` must not be bundled but may only be loaded as a library at runtime.
+It will be loaded from `https://cdn.jsdelivr.net` by default, but it can also be fetched from
 a different endpoint if desired.
 
 Bundlers must be configured so that they treat `@undecaf/zbar-wasm` as an external dependency instead of trying to resolve it.
