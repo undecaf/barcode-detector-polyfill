@@ -16,13 +16,16 @@ It offers the following features:
   `ean_8`, `ean_13`, `ean_13+2`, `ean_13+5`, `isbn_10`, `isbn_13`, `isbn_13+2`, `isbn_13+5`, `itf`,
   `qr_code`, `sq_code`, `upc_a`, `upc_e`
 + Not supported: `aztec`, `data_matrix`, `pdf417`
-+ Scans `<img>`, `<canvas>` and live `<video>` elements, `Blob` and `File` instances and more
++ Scans `<img>`, `<canvas>` and live `<video>` elements, image and video `Blob`s and `File`s and more
++ Detects multiple barcodes per frame, also with different types
++ Barcodes may be oriented horizontally or vertically
 + Avoids the LGPL license obligation of the [`@undecaf/zbar-wasm`](https://www.npmjs.com/package/@undecaf/zbar-wasm) dependency
   by loading it at runtime as a library
 + Outperforms pure JavaScript polyfills
 
-An online example [is available here](https://undecaf.github.io/barcode-detector-polyfill/example/)
-([source code with build scripts for Rollup and esbuild](https://github.com/undecaf/barcode-detector-polyfill/tree/master/example)).
+An online example is available [on GitHub](https://undecaf.github.io/barcode-detector-polyfill/example/)
+([source code](https://github.com/undecaf/barcode-detector-polyfill/tree/master/example) with build scripts for Rollup and esbuild)
+and [on CodePen](https://codepen.io/undecaf/pen/LYzXXzg).
 
 
 ## Polyfilling `BarcodeDetector`
