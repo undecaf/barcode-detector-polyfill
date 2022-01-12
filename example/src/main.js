@@ -6,7 +6,9 @@ document
     .querySelectorAll('[id]')
     .forEach(element => el[element.id] = element)
 
-const ctx = el.canvas.getContext('2d')
+const
+    canvas = el.canvas,
+    ctx = canvas.getContext('2d');
 
 let
     supportedFormats,
