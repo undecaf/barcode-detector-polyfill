@@ -13,7 +13,7 @@ const
 let
     supportedFormats,
     detector,
-    timeoutId = null;
+    requestId = null;
 
 
 async function createDetector() {
@@ -76,11 +76,11 @@ function detectVideo(repeat) {
 
     if (repeat) {
         detect(el.video)
-            .then(() => timeoutId = setTimeout(() => detectVideo(true), 100))
+            .then(() => requestId = requestAnimationFrame(() => detectVideo(true)))
 
     } else {
-        clearTimeout(timeoutId)
-        timeoutId = null
+        cancelAnimationFrame(requestId)
+        requestId = null
     }
 }
 
@@ -120,7 +120,7 @@ el.imgBtn.addEventListener('click', event => {
 
 
 el.videoBtn.addEventListener('click', event => {
-    if (!timeoutId) {
+    if (!requestId) {
         navigator.mediaDevices.getUserMedia({audio: false, video: {facingMode: 'environment'}})
             .then(stream => {
                 el.imgUrl.className = el.imgBtn.className = ''
