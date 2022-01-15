@@ -2,6 +2,7 @@ import { ZBarScanner, scanRGBABuffer, ZBarConfigType, ZBarSymbol, ZBarSymbolType
 import { ScannerConfig } from './ScannerConfig'
 import { DetectedBarcode, Orientation } from './DetectedBarcode'
 import { ZBarConfig } from './ZBarConfig'
+import { Canvas, newCanvas } from '@/Canvas'
 
 
 /**
@@ -13,8 +14,8 @@ export class BarcodeDetectorPolyfill {
 
     private readonly formats: Array<string>
     private readonly zbarConfig: ZBarConfig
-    private readonly canvas: HTMLCanvasElement
 
+    private canvas?: Canvas
     private scanner?: ZBarScanner
 
 
@@ -40,7 +41,6 @@ export class BarcodeDetectorPolyfill {
 
         this.formats = options.formats || ScannerConfig.formats()
         this.zbarConfig = options.zbar || new ZBarConfig()
-        this.canvas = document.createElement('canvas')
     }
 
 
@@ -63,8 +63,8 @@ export class BarcodeDetectorPolyfill {
     detect(source: ImageBitmapSource): Promise<Array<Object>> {
         // Return an empty array immediately if the source is an object with any zero dimension,
         // see https://wicg.github.io/shape-detection-api/#image-sources-for-detection
-        const natural = BarcodeDetectorPolyfill.naturalDimensions(source)
-        if ((natural.width === 0) || (natural.height === 0)) {
+        const intrinsic = BarcodeDetectorPolyfill.intrinsicDimensions(source)
+        if ((intrinsic.width === 0) || (intrinsic.height === 0)) {
             return Promise.resolve([])
 
         } else {
@@ -76,8 +76,8 @@ export class BarcodeDetectorPolyfill {
 
                 .then(fulfilled => {
                     const
-                        imageData = fulfilled[0],
-                        scanner = fulfilled[1];
+                        imageData: ImageData = fulfilled[0],
+                        scanner: ZBarScanner = fulfilled[1];
 
                     // Configure the image cache if so requested
                     if (typeof this.zbarConfig.enableCache !== 'undefined') {
@@ -88,7 +88,9 @@ export class BarcodeDetectorPolyfill {
                 })
 
                 .then(symbols => {
-                    return symbols.map(symbol => this.toBarcodeDetectorResult(symbol))
+                    return symbols.map(symbol =>
+                        this.toBarcodeDetectorResult(symbol)
+                    )
                 })
         }
 
@@ -125,13 +127,17 @@ export class BarcodeDetectorPolyfill {
 
         const canvasToImageData = (src: CanvasImageSource): ImageData => {
             // Draw on the canvas in the natural size of the source
+            const intrinsic = BarcodeDetectorPolyfill.intrinsicDimensions(src)
+
+            // Create a new canvas if the dimensions have changed
+            if (!this.canvas || (this.canvas.width !== intrinsic.width) || (this.canvas.height !== intrinsic.height)) {
+                this.canvas = newCanvas(intrinsic.width, intrinsic.height)
+            }
+
             const
                 canvas = this.canvas,
-                context = canvas.getContext('2d'),
-                natural = BarcodeDetectorPolyfill.naturalDimensions(src)
+                context = canvas.getContext('2d');
 
-            canvas.width = natural.width
-            canvas.height = natural.height
             context!.drawImage(src, 0, 0)
 
             return context!.getImageData(0, 0, canvas.width, canvas.height)
@@ -160,8 +166,7 @@ export class BarcodeDetectorPolyfill {
 
 
     /**
-     * Converts a ZBar {@link ZBarSymbol} to the kind of object returned by
-     * {@link external:BarcodeDetector#detect}
+     * Converts a ZBar {@link ZBarSymbol} to a {@link DetectedBarcode}.
      */
     private toBarcodeDetectorResult(symbol: ZBarSymbol): DetectedBarcode {
         // Determine a bounding box that contains all points
@@ -201,9 +206,10 @@ export class BarcodeDetectorPolyfill {
 
 
     /**
-     * Returns the natural dimensions of an {@link external:ImageBitmapSource}.
+     * Returns the intrinsic (as opposed to the rendered)
+     * dimensions of an {@link external:ImageBitmapSource}.
      */
-    private static naturalDimensions(source: ImageBitmapSource): { width: number, height: number } {
+    private static intrinsicDimensions(source: ImageBitmapSource): { width: number, height: number } {
         return {
             width: Number(source['naturalWidth'] || source['videoWidth'] || source['width']),
             height: Number(source['naturalHeight'] || source['videoHeight'] || source['height'])
