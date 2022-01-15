@@ -221,17 +221,23 @@ describe('BarcodeDetectorPolyfill detection', () => {
         });
 
 
-    [tests[0]]
-        .forEach(test => {
-            it(`detects ${test.filename} in ImageBitmap explicitly`, async () => {
-                const bitmap = await createImageBitmap(await loadImage(test))
+    // Running this test on browsers that do not support createImageBitmap()
+    // is pointless because createImageBitmap() polyfills do not return actual
+    // ImageBitmap instances but usually only Image instances which are already
+    // covered by other tests
+    if (typeof window['createImageBitmap'] === 'function') {
+        [tests[0]]
+            .forEach(test => {
+                it(`detects ${test.filename} in ImageBitmap explicitly`, async () => {
+                    const bitmap = await createImageBitmap(await loadImage(test))
 
-                const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                const barcodes = await detector.detect(bitmap)
+                    const detector = new BarcodeDetectorPolyfill({formats: test.format})
+                    const barcodes = await detector.detect(bitmap)
 
-                verify(barcodes, test)
+                    verify(barcodes, test)
+                })
             })
-        });
+    }
 
 
     [tests[0]]

@@ -1,7 +1,6 @@
 # Artifacts
 node_modules
 /dist
-/undecaf-*.tgz
 
 # Editor directories and files
 .idea
@@ -12,7 +11,11 @@ node_modules
 *.njsproj
 *.sln
 *.sw?
+*.log
 
 # Test results
 /coverage
 /screenshots
+
+# Credentials
+/secrets

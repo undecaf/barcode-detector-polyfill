@@ -1,6 +1,7 @@
 const commonjs = require('@rollup/plugin-commonjs')
 const json = require('@rollup/plugin-json')
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
+const { bsCredentials } = require('./secrets/browserstack.cjs')
 const { ZBAR_WASM_PKG_NAME, ZBAR_WASM_REPOSITORY, ZBAR_WASM_VERSION } = require('./dist/zbar-wasm.meta.cjs')
 
 
@@ -72,7 +73,7 @@ module.exports = function(config) {
         },
 
         // Test result reporters
-        reporters: ['mocha'],
+        reporters: ['spec', 'BrowserStack'],
 
         // Web server port
         port: 9876,
@@ -86,13 +87,67 @@ module.exports = function(config) {
         // Watch files and execute tests on change
         autoWatch: false,
 
+        // BrowserStack configuration
+        browserStack: {
+            ...bsCredentials,
+        },
+
+        // Browsers on BrowserStack
+        customLaunchers: {
+            'Safari-13.1': {
+                base: 'BrowserStack',
+                browser: 'Safari',
+                browser_version: '13.1',
+                os: 'OS X',
+                os_version: 'Catalina'
+            },
+
+            'Safari-14.1': {
+                base: 'BrowserStack',
+                browser: 'Safari',
+                browser_version: '14.1',
+                os: 'OS X',
+                os_version: 'Big Sur'
+            },
+
+            'Safari-15.1': {
+                base: 'BrowserStack',
+                browser: 'Safari',
+                browser_version: '15.1',
+                os: 'OS X',
+                os_version: 'Monterey'
+            },
+
+            'Edge-90': {
+                base: 'BrowserStack',
+                browser: 'Edge',
+                browser_version: '90.0',
+                os: 'Windows',
+                os_version: '10',
+            },
+        },
+
+        // Timeouts have to be adapted for BrowserStack
+        captureTimeout: 120e3,
+        browserDisconnectTolerance: 0,
+        browserDisconnectTimeout: 120e3,
+        browserSocketTimeout: 60e3,
+        browserNoActivityTimeout: 120e3,
+
         // Launch these browsers
-        browsers: ['ChromiumHeadless', 'FirefoxHeadless'],
+        browsers: [
+            'ChromiumHeadless',
+            'FirefoxHeadless',
+            // 'Safari-13.1',
+            // 'Safari-14.1',
+            // 'Safari-15.1',
+            // 'Edge-90',
+        ],
+
+        // Number of browsers to be launched simultaneously
+        concurrency: 5,
 
         // Exit after running the tests
         singleRun: true,
-
-        // Number of browsers to be launched simultaneously
-        concurrency: Infinity,
     })
 }

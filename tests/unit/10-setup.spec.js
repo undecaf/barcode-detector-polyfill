@@ -73,17 +73,23 @@ describe('BarcodeDetectorPolyfill setup', () => {
     })
 
 
-    it('accepts ImageBitmap sources', async () => {
-        const img = document.createElement('img')
-        img.src = imgUrl
-        await img.decode()
-        const bitmap = await createImageBitmap(img)
+    // Running this test on browsers that do not support createImageBitmap()
+    // is pointless because createImageBitmap() polyfills do not return actual
+    // ImageBitmap instances but usually only Image instances which are already
+    // covered by other tests
+    if (typeof window['createImageBitmap'] === 'function') {
+        it('accepts ImageBitmap sources', async () => {
+            const img = document.createElement('img')
+            img.src = imgUrl
+            await img.decode()
+            const bitmap = await createImageBitmap(img)
 
-        const imageData = await detector.toImageData(bitmap)
+            const imageData = await detector.toImageData(bitmap)
 
-        expect(imageData.width).to.equal(imgWidth)
-        expect(imageData.height).to.equal(imgHeight)
-    });
+            expect(imageData.width).to.equal(imgWidth)
+            expect(imageData.height).to.equal(imgHeight)
+        })
+    }
 
 
     imgScales.forEach(scale => {
