@@ -46,7 +46,7 @@ Make the polyfill available if necessary:
 import { BarcodeDetectorPolyfill } from '@undecaf/barcode-detector-polyfill'
 
 try {
-    new window['BarcodeDetector']()
+    window['BarcodeDetector'].getSupportedFormats()
 } catch {
     window['BarcodeDetector'] = BarcodeDetectorPolyfill
 }
@@ -62,9 +62,9 @@ Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill/dist/index.js"></script>
 <script>
     try {
-      new window['BarcodeDetector']()
+        window['BarcodeDetector'].getSupportedFormats()
     } catch {
-      window['BarcodeDetector'] = barcodeDetectorPolyfill.BarcodeDetectorPolyfill
+        window['BarcodeDetector'] = barcodeDetectorPolyfill.BarcodeDetectorPolyfill
     }
       ⁝
 </script>
@@ -123,7 +123,7 @@ const barcodes = await detector.detect(source)
 + a [`Blob`](https://developer.mozilla.org/en-US/docs/Web/API/Blob) or a 
   [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) with a content `type` of `image/*`
 
-The detector processes the `source` in its natural size, making detection results independent of the size rendered
+The detector processes the `source` in natural size, making detection results independent of the size rendered
 by the browser.
 
 Detected barcodes are stored as an array of objects in `barcodes` since `source` may contain multiple barcodes.
