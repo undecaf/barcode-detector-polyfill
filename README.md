@@ -4,6 +4,7 @@
 ![Open issues](https://badgen.net/github/open-issues/undecaf/barcode-detector-polyfill)
 ![Vulnerabilities](https://snyk.io/test/npm/@undecaf/barcode-detector-polyfill/badge.svg)
 ![Total downloads](https://badgen.net/npm/dt/@undecaf/barcode-detector-polyfill)
+[![](https://data.jsdelivr.com/v1/package/npm/@undecaf/barcode-detector-polyfill/badge?style=rounded)](https://www.jsdelivr.com/package/npm/@undecaf/barcode-detector-polyfill)
 ![License](https://badgen.net/github/license/undecaf/barcode-detector-polyfill)
 
 This package polyfills the [Barcode Detection API](https://developer.mozilla.org/en-US/docs/Web/API/Barcode_Detection_API) for browsers,
@@ -60,7 +61,7 @@ Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.11/dist/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.12/dist/index.js"></script>
 <script>
     try {
         window['BarcodeDetector'].getSupportedFormats()
