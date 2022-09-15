@@ -56,11 +56,11 @@ export class BarcodeDetectorPolyfill {
     /**
      * Scans an image for barcodes and returns a {@link Promise} for the result.
      *
-     * @param {ImageBitmapSource} image the image to be scanned
-     * @returns {Promise<Object>} the scan result as described for {@link BarcodeDetector}
+     * @param {ImageBitmapSource} source the image to be scanned
+     * @returns {Promise<Array<DetectedBarcode>>} the scan result as described for {@link BarcodeDetector}
      */
     // TODO Enable cache for video source, disable for others unless overridden in zbarConfig
-    detect(source: ImageBitmapSource): Promise<Array<Object>> {
+    detect(source: ImageBitmapSource): Promise<Array<DetectedBarcode>> {
         // Return an empty array immediately if the source is an object with any zero dimension,
         // see https://wicg.github.io/shape-detection-api/#image-sources-for-detection
         const intrinsic = BarcodeDetectorPolyfill.intrinsicDimensions(source)
