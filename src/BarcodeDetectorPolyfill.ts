@@ -57,10 +57,17 @@ export class BarcodeDetectorPolyfill {
      * Scans an image for barcodes and returns a {@link Promise} for the result.
      *
      * @param {ImageBitmapSource} source the image to be scanned
-     * @returns {Promise<Array<DetectedBarcode>>} the scan result as described for {@link BarcodeDetector}
+     * @returns {Promise<Array<DetectedBarcode>>} the scan result as described for {@link BarcodeDetector},
+     *  or a rejected {@link Promise} containing the error
+     * @throws {TypeError} if the argument is not an {@link ImageBitmapSource}
      */
     // TODO Enable cache for video source, disable for others unless overridden in zbarConfig
     detect(source: ImageBitmapSource): Promise<Array<DetectedBarcode>> {
+        // Assert the argument type
+        if (!BarcodeDetectorPolyfill.isImageBitmapSource(source)) {
+            throw new TypeError('BarcodeDetector.detect() argument is not an ImageBitmapSource')
+        }
+
         // Return an empty array immediately if the source is an object with any zero dimension,
         // see https://wicg.github.io/shape-detection-api/#image-sources-for-detection
         const intrinsic = BarcodeDetectorPolyfill.intrinsicDimensions(source)
@@ -68,30 +75,36 @@ export class BarcodeDetectorPolyfill {
             return Promise.resolve([])
 
         } else {
-            return Promise
-                .all([
-                    this.toImageData(source),
-                    this.getScanner()
-                ])
+            try {
+                return Promise
+                    .all([
+                        this.toImageData(source),
+                        this.getScanner()
+                    ])
 
-                .then(fulfilled => {
-                    const
-                        imageData: ImageData = fulfilled[0],
-                        scanner: ZBarScanner = fulfilled[1];
+                    .then(fulfilled => {
+                        const
+                            imageData: ImageData = fulfilled[0],
+                            scanner: ZBarScanner = fulfilled[1];
 
-                    // Configure the image cache if so requested
-                    if (typeof this.zbarConfig.enableCache !== 'undefined') {
-                        scanner.enableCache(this.zbarConfig.enableCache)
-                    }
+                        // Configure the image cache if so requested
+                        if (typeof this.zbarConfig.enableCache !== 'undefined') {
+                            scanner.enableCache(this.zbarConfig.enableCache)
+                        }
 
-                    return scanRGBABuffer(imageData.data, imageData.width, imageData.height, scanner)
-                })
+                        return scanRGBABuffer(imageData.data, imageData.width, imageData.height, scanner)
+                    })
 
-                .then(symbols => {
-                    return symbols.map(symbol =>
-                        this.toBarcodeDetectorResult(symbol)
-                    )
-                })
+                    .then(symbols => {
+                        return symbols.map(symbol =>
+                            this.toBarcodeDetectorResult(symbol)
+                        )
+                    })
+
+            } catch (error) {
+                // #8: return a rejected Promise if an exception occurred
+                return Promise.reject(error)
+            }
         }
 
     }
@@ -202,6 +215,24 @@ export class BarcodeDetectorPolyfill {
         }
 
         return barcode
+    }
+
+
+    /**
+     * Type guard for {@link external:ImageBitmapSource} and any
+     * object having zero width or height.
+     */
+    private static isImageBitmapSource(source: any): source is ImageBitmapSource {
+        return (source instanceof HTMLImageElement)
+            || (source instanceof HTMLVideoElement)
+            || (source instanceof HTMLCanvasElement)
+            || (source instanceof Blob)
+            || (source instanceof ImageData)
+            || (source instanceof CanvasRenderingContext2D)
+            || (source instanceof ImageBitmap)
+            // Note the (lenient) equality operator
+            || (source && source.width == 0)
+            || (source && source.height == 0)
     }
 
 

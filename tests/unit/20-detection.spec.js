@@ -322,6 +322,39 @@ describe('BarcodeDetectorPolyfill detection', () => {
 
                 expect(barcodes).to.be.an('array').that.has.lengthOf(0)
             })
+        });
+
+
+    [undefined, null, '', 0, {}, { width: 1 }]
+        .forEach(source => {
+            it(`throws a TypeError if the detect() argument is ${source}`, async () => {
+                const detector = new BarcodeDetectorPolyfill({formats: tests[0].format})
+                try {
+                    detector.detect(source)
+
+                } catch (error) {
+                    expect(error instanceof TypeError).to.equal(true, `Exception is not a TypeError but ${error}`)
+                    return
+                }
+
+                expect(false).to.equal(true, 'No exception was thrown')
+            })
+        });
+
+
+    [
+        document.createElement('img'),
+        document.createElement('video'),
+        document.createElement('canvas'),
+        new Blob(),
+    ]
+        .forEach(source => {
+            it(`returns a rejected Promise for an invalid ${source}`, () => {
+                const detector = new BarcodeDetectorPolyfill({formats: tests[0].format})
+                detector.detect(source)
+                    .then((result) => expect(false).to.equal(true, `Promise not rejected but resolved with ${result}`))
+                    .catch(() => {})
+            })
         })
 
 })

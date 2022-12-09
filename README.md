@@ -113,7 +113,10 @@ const detector = new BarcodeDetectorPolyfill({
 const barcodes = await detector.detect(source)
 ```
 
-`source` may be any object of which an [`ImageBitmap`](https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap) can be obtained:
+`source` must be an object of which an [`ImageBitmap`](https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap)
+can be obtained, or else a 
+[`TypeError`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError)
+will be thrown:
 
 + an `<img>` element ([`HTMLImageElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement))
 + a `<video>` element ([`HTMLVideoElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement))
@@ -124,6 +127,8 @@ const barcodes = await detector.detect(source)
 + a [`CanvasRenderingContext2D`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D)
 + a [`Blob`](https://developer.mozilla.org/en-US/docs/Web/API/Blob) or a 
   [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) with a content `type` of `image/*`
+
+In addition, any object with a zero `width` or `height` property will be tolerated.
 
 The detector processes the `source` in natural size, making detection results independent of the size rendered
 by the browser.
@@ -144,6 +149,10 @@ Additional properties provided only by `BarcodeDetectorPolyfill`:
   `3`&nbsp;&rarr; rotated 90° counterclockwise, `-1`&nbsp;&rarr; unknown
 + `quality`: a positive integer indicating the barcode quality as seen by the detector,
   specific to each `format`
+
+If an error occurs during barcode detection then the `detect()` method returns a rejected
+[`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+containing the error.
 
 
 ### Typescript support
