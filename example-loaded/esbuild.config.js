@@ -12,7 +12,7 @@ const zbarWasmRepository =
 const options = {
     entryPoints: ['./src/main.js'],
     bundle: true,
-    outfile: '../docs/example/js/main.js',
+    outfile: '../docs/example-loaded/js/main.js',
     format: 'esm',
     target: 'es2015',
     minify: true,

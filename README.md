@@ -20,8 +20,6 @@ It offers the following features:
 + Scans `<img>`, `<canvas>` and live `<video>` elements, image and video `Blob`s and `File`s and more
 + Detects multiple barcodes per frame, also with different types
 + Barcodes may be oriented horizontally or vertically
-+ Avoids the LGPL license obligation of the [`@undecaf/zbar-wasm`](https://www.npmjs.com/package/@undecaf/zbar-wasm) dependency
-  by loading it at runtime as a library
 + Outperforms pure JavaScript polyfills
 
 An online example is available [on GitHub](https://undecaf.github.io/barcode-detector-polyfill/example/)
@@ -60,7 +58,7 @@ try {
 Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.11/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.12/dist/index.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.13/dist/index.js"></script>
 <script>
     try {
@@ -161,21 +159,33 @@ Type definitions for `BarcodeDetectorPolyfill`, for constructor and method param
 are provided in `@undecaf/barcode-detector-polyfill/dist/main.d.ts`. 
 
 
-## Bundling
+## Build configurations
 
-This package, [`@undecaf/barcode-detector-polyfill`](https://www.npmjs.com/package/@undecaf/barcode-detector-polyfill),
+### Bundling dependency `@undecaf/zbar-wasm`
+
+[This package](https://www.npmjs.com/package/@undecaf/barcode-detector-polyfill)
 is under the MIT license although it depends on [`@undecaf/zbar-wasm`](https://www.npmjs.com/package/@undecaf/zbar-wasm)
 which is under LGPL.
+Nevertheless, `@undecaf/zbar-wasm` may be bundled in your project as this does not violate the [LGPL requirements](https://fossa.com/blog/open-source-software-licenses-101-lgpl-license/). 
 
-In order to comply with the LGPL, `@undecaf/zbar-wasm` must not be bundled but may only be loaded as a library at runtime.
-It will be loaded from `https://cdn.jsdelivr.net` by default, but it can also be fetched from
+Module `@undecaf/zbar-wasm`, however, expects the WASM file `zbar.wasm` to be located at the same path as itself;
+details can be found in the [documentation of `@undecaf/zbar-wasm`](https://github.com/undecaf/zbar-wasm#bundlingdeploying-zbar-wasm).
+Therefore, bundlers must be configured accordingly. Configuration examples for [Rollup](https://rollupjs.org/) and [esbuild](https://esbuild.github.io/)
+can be found in directory [`example-bundled`](https://github.com/undecaf/barcode-detector-polyfill/tree/master/example-bundled).
+They were used to bundle the JavaScript code for this [online example](https://undecaf.github.io/barcode-detector-polyfill/example-bundled/)
+in [`docs/example-bundled`](https://github.com/undecaf/barcode-detector-polyfill/tree/master/docs/example-bundled).
+
+### Loading dependency `@undecaf/zbar-wasm` at runtime
+
+~~In order to comply with the LGPL, `@undecaf/zbar-wasm` must not be bundled but may only be loaded as a library at runtime.~~
+`@undecaf/zbar-wasm` can also be loaded at runtime, by default from `https://cdn.jsdelivr.net`. It can also be fetched from
 a different endpoint if desired.
 
 Bundlers must be configured so that they treat `@undecaf/zbar-wasm` as an external dependency instead of trying to resolve it.
-Sample build configurations for [Rollup](https://rollupjs.org/) and [esbuild](https://esbuild.github.io/)
-can be found in the [`example`](https://github.com/undecaf/barcode-detector-polyfill/tree/master/example) directory.
-They were used to bundle the JavaScript code for the [online example](https://undecaf.github.io/barcode-detector-polyfill/example/)
-in [`docs/example`](https://github.com/undecaf/barcode-detector-polyfill/tree/master/docs/example).
+Configuration examples for [Rollup](https://rollupjs.org/) and [esbuild](https://esbuild.github.io/)
+can be found in directory [`example-loaded`](https://github.com/undecaf/barcode-detector-polyfill/tree/master/example-loaded).
+They were used to bundle the JavaScript code for this [online example](https://undecaf.github.io/barcode-detector-polyfill/example-loaded/)
+in [`docs/example-loaded`](https://github.com/undecaf/barcode-detector-polyfill/tree/master/docs/example-loaded).
 They also illustrate how to load `@undecaf/zbar-wasm` from a non-default endpoint.
 
 

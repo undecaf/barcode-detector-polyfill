@@ -14,7 +14,7 @@ export default [
     {
         input: 'src/main.js',
         output: {
-            file: '../docs/example/js/main.js',
+            file: '../docs/example-loaded/js/main.js',
             format: 'esm',
             generatedCode: 'es2015',
             sourcemap: false,
