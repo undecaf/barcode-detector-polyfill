@@ -22,8 +22,8 @@ It offers the following features:
 + Barcodes may be oriented horizontally or vertically
 + Outperforms pure JavaScript polyfills
 
-An online example is available [on GitHub](https://undecaf.github.io/barcode-detector-polyfill/example/)
-([source code](https://github.com/undecaf/barcode-detector-polyfill/tree/master/example) with build scripts for Rollup and esbuild)
+An online example is available [on GitHub](https://undecaf.github.io/barcode-detector-polyfill/example-loaded/)
+([source code](https://github.com/undecaf/barcode-detector-polyfill/tree/master/example-loaded) with build scripts for Rollup and esbuild)
 and [on CodePen](https://codepen.io/undecaf/pen/LYzXXzg).
 
 
