@@ -58,8 +58,8 @@ try {
 Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.12/dist/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.13/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.14/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.17/dist/index.js"></script>
 <script>
     try {
         window['BarcodeDetector'].getSupportedFormats()

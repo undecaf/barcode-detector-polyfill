@@ -1,4 +1,11 @@
-import { ZBarScanner, scanRGBABuffer, ZBarConfigType, ZBarSymbol, ZBarSymbolType } from '@undecaf/zbar-wasm'
+import {
+    ZBarScanner,
+    scanRGBABuffer,
+    ZBarConfigType,
+    ZBarSymbol,
+    ZBarSymbolType,
+    getDefaultScanner,
+} from '@undecaf/zbar-wasm'
 import { ScannerConfig } from './ScannerConfig'
 import { DetectedBarcode, Orientation } from './DetectedBarcode'
 import { ZBarConfig } from './ZBarConfig'
@@ -116,7 +123,7 @@ export class BarcodeDetectorPolyfill {
     private getScanner(): Promise<ZBarScanner> {
         return new Promise<ZBarScanner>(async (resolve, reject) => {
             if (!this.scanner) {
-                const scanner = await ZBarScanner.create()
+                const scanner = await getDefaultScanner()
 
                 // Configure the scanner for the requested formats
                 if (this.formats.length > 0) {

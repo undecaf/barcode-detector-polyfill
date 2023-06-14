@@ -1,6 +1,6 @@
 {
   "name": "@undecaf/barcode-detector-polyfill",
-  "version": "0.9.16",
+  "version": "0.9.17",
   "description": "A WebAssembly polyfill for the Barcode Detection API",
   "keywords": [
     "polyfill",
@@ -48,7 +48,7 @@
     "npm:pack": "npm pack"
   },
   "dependencies": {
-    "@undecaf/zbar-wasm": "^0.9.12"
+    "@undecaf/zbar-wasm": "^0.9.14"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^21.0.1",

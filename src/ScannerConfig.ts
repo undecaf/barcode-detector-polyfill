@@ -1,4 +1,4 @@
-import { ZBarScanner, ZBarConfigType, ZBarSymbolType } from '@undecaf/zbar-wasm'
+import {ZBarConfigType, ZBarScanner, ZBarSymbolType} from '@undecaf/zbar-wasm'
 
 
 /**

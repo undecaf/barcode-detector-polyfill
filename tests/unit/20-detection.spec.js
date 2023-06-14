@@ -33,11 +33,16 @@ describe('BarcodeDetectorPolyfill detection', () => {
         new BarcodeTest('isbn_13+5', ['9781234567897', '12345'], ['isbn_13', 'ean_5']),
         new BarcodeTest('itf', '123456789098765432'),
         new BarcodeTest('qr_code', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'),
+        new BarcodeTest('qr_code.utf8-1', 'ÄÖÜ äöü ß ÁÉÍÓÚ áéíóú ÀÈÌÒÙ àéíóú'),
+        new BarcodeTest('qr_code.utf8-2', 'Thôn Hoan Trung, Chiến Thắng, Bắc Sơn, Lạng Sơn'),
         new BarcodeTest('upc_a', '162738495012'),
         new BarcodeTest('upc_e', '09876547'),
     ]
 
-    let encodingTest = new BarcodeTest('qr_code.utf8', 'ÄÖÜ äöü ß ÁÉÍÓÚ áéíóú ÀÈÌÒÙ àéíóú')
+    let encodingTests = [
+        new BarcodeTest('qr_code.utf8-1', 'ÄÖÜ äöü ß ÁÉÍÓÚ áéíóú ÀÈÌÒÙ àéíóú'),
+        new BarcodeTest('qr_code.utf8-2', 'Thôn Hoan Trung, Chiến Thắng, Bắc Sơn, Lạng Sơn'),
+    ]
 
     let supportedFormats
 
@@ -254,21 +259,24 @@ describe('BarcodeDetectorPolyfill detection', () => {
         });
 
 
-    it('handles UTF-8 encoding', async () => {
-        const img = await loadImage(encodingTest)
+    encodingTests
+        .forEach(test => {
+            it('handles UTF-8 encoding', async () => {
+                const img = await loadImage(test)
 
-        let detector = new BarcodeDetectorPolyfill({formats: encodingTest.format})
-        let barcodes = await detector.detect(img)
+                let detector = new BarcodeDetectorPolyfill({formats: test.format})
+                let barcodes = await detector.detect(img)
 
-        verify(barcodes, encodingTest)
+                verify(barcodes, test)
 
-        detector = new BarcodeDetectorPolyfill({formats: encodingTest.format, zbar: {encoding: 'iso-8859-15'}})
-        barcodes = await detector.detect(img)
+                detector = new BarcodeDetectorPolyfill({formats: test.format, zbar: {encoding: 'iso-8859-15'}})
+                barcodes = await detector.detect(img)
 
-        barcodes.forEach(barcode => {
-            expect(barcode.rawValue).not.to.be.oneOf(encodingTest.expectedRawValues)
-        })
-    })
+                barcodes.forEach(barcode => {
+                    expect(barcode.rawValue).not.to.be.oneOf(test.expectedRawValues)
+                })
+            })
+        });
 
 
     it('detects symbol orientation', async () => {
