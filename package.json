@@ -1,6 +1,6 @@
 {
   "name": "@undecaf/barcode-detector-polyfill",
-  "version": "0.9.17",
+  "version": "0.9.18",
   "description": "A WebAssembly polyfill for the Barcode Detection API",
   "keywords": [
     "polyfill",
@@ -37,7 +37,8 @@
   "files": [
     "dist/*.js",
     "dist/*.cjs",
-    "dist/*.d.ts"
+    "dist/*.d.ts",
+    "dist/*.js.map"
   ],
   "scripts": {
     "prebuild": "rimraf dist/*",
