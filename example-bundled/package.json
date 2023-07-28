@@ -1,6 +1,6 @@
 {
   "name": "@undecaf/barcode-detector-polyfill-example",
-  "version": "0.9.17",
+  "version": "0.9.19",
   "type": "module",
   "scripts": {
     "build:esbuild": "node esbuild.config.js",
@@ -9,8 +9,8 @@
   "author": "F. Kasper <fkasper@modus-operandi.at>",
   "license": "MIT",
   "dependencies": {
-    "@undecaf/barcode-detector-polyfill": "^0.9.17",
-    "@undecaf/zbar-wasm": "^0.9.14"
+    "@undecaf/barcode-detector-polyfill": "^0.9.19",
+    "@undecaf/zbar-wasm": "^0.9.15"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.1.1",

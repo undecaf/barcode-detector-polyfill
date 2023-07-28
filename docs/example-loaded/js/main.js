@@ -1,8 +1,8 @@
-import{ZBarSymbolType as e,ZBarConfigType as t,scanRGBABuffer as n,getDefaultScanner as i}from"https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.14/dist/main.js";
+import{ZBarSymbolType as e,ZBarConfigType as t,scanRGBABuffer as n,getDefaultScanner as i}from"https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/main.js";
 /*!
- * @undecaf/barcode-detector-polyfill v0.9.17
+ * @undecaf/barcode-detector-polyfill v0.9.19
  * A WebAssembly polyfill for the Barcode Detection API
- * Built 2023-06-14T20:17:59.028Z
+ * Built 2023-07-28T13:59:19.053Z
  * (c) 2021-present Ferdinand Kasper <fkasper@modus-operandi.at>
  * Released under the MIT license.
  * 
