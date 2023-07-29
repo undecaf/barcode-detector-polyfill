@@ -6,7 +6,7 @@ type Point = { x: number, y: number }
 export interface DetectedBarcode {
 
     boundingBox: DOMRectReadOnly
-    cornerPoints: Array<Point>
+    cornerPoints: [Point, Point, Point, Point]
     format: string
     rawValue: string
 
