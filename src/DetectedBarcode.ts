@@ -1,7 +1,7 @@
 type Point = { x: number, y: number }
 
 /**
- * @see https://wicg.github.io/shape-detection-api/#detectedbarcode-section
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/BarcodeDetector/detect#return_value
  */
 export interface DetectedBarcode {
 

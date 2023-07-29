@@ -9,7 +9,7 @@
   "author": "F. Kasper <fkasper@modus-operandi.at>",
   "license": "MIT",
   "dependencies": {
-    "@undecaf/barcode-detector-polyfill": "^0.9.19"
+    "@undecaf/barcode-detector-polyfill": "^0.9.20"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.1.1",
