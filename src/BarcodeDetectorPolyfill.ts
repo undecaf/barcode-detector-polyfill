@@ -230,13 +230,13 @@ export class BarcodeDetectorPolyfill {
      * object having zero width or height.
      */
     private static isImageBitmapSource(source: any): source is ImageBitmapSource {
-        return (source instanceof HTMLImageElement)
-            || (source instanceof HTMLVideoElement)
-            || (source instanceof HTMLCanvasElement)
-            || (source instanceof Blob)
+        return (typeof HTMLImageElement !== 'undefined' && source instanceof HTMLImageElement)
+            || (typeof HTMLVideoElement !== 'undefined' && source instanceof HTMLVideoElement)
+            || (typeof HTMLCanvasElement !== 'undefined' && source instanceof HTMLCanvasElement)
+            || (typeof CanvasRenderingContext2D !== 'undefined' && source instanceof CanvasRenderingContext2D)
+            || (typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap)
             || (source instanceof ImageData)
-            || (source instanceof CanvasRenderingContext2D)
-            || (source instanceof ImageBitmap)
+            || (source instanceof Blob)
             // Note the (lenient) equality operator
             || (source && source.width == 0)
             || (source && source.height == 0)
