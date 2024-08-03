@@ -70,7 +70,7 @@ Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 </script>
 ```
 
-For details, see [this example](https://undecaf.github.io/barcode-detector-polyfill/example-script/).
+For details, see [this example](https://undecaf.github.io/barcode-detector-polyfill/example-script/index.html).
 
 
 
