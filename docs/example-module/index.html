@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, minimum-scale=0.9">
+
+  <title>BarcodeDetector polyfill example</title>
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <link rel="icon" type="image/png" href="img/favicon.png">
+</head>
+
+<body>
+<div class="container">
+  <h4>
+    <code>BarcodeDetector</code> polyfill example,
+    <a href="https://www.npmjs.com/package/@undecaf/zbar-wasm"><code>zbar-wasm</code></a> in a module script
+  </h4>
+
+  <div>Supported formats: <pre id="formats"></pre></div>
+
+  <h5>Image source</h5>
+
+  <input id="fileInput" type="file" style="display: none;" accept="image/*">
+
+  <input id="imgUrl" type="url" placeholder="Paste an image URL then click outside" required>
+  <button id="imgBtn">Image file</button>
+  <button id="videoBtn">Camera</button>
+
+  <select id="encoding">
+    <option value="utf-8" selected>UTF-8</option>
+    <option value="iso-8859-15">ISO-8859-15</option>
+    <option value="windows-1252">Windows-1252</option>
+    <option value="macintosh">Macintosh</option>
+  </select>
+
+  <label>
+    <input id="details" type="checkbox">
+    <span class="label-body">Show details</span>
+  </label>
+
+  <div class="viewport">
+    <canvas id="canvas"></canvas>
+    <img id="img" crossorigin="anonymous">
+    <video id="video" muted autoplay playsinline></video>
+  </div>
+
+  <p id="note">If the image does not appear then loading may have been blocked by the server's CORS policy.</p>
+
+  <h5>Result</h5>
+
+  <pre id="result"></pre>
+</div>
+
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>
