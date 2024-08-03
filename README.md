@@ -70,8 +70,27 @@ Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 </script>
 ```
 
-For details, see [this example](https://undecaf.github.io/barcode-detector-polyfill/example-script/index.html).
+A detailed example is available [here](https://undecaf.github.io/barcode-detector-polyfill/example-script/index.html).
 
+
+### In a `<script type="module">`
+
+Import the `BarcodeDetectorPolyfill` API:
+
+```html
+<script type="module">
+    import { BarcodeDetectorPolyfill } from "https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/main.js";
+
+    try {
+        window['BarcodeDetector'].getSupportedFormats()
+    } catch {
+        window['BarcodeDetector'] = BarcodeDetectorPolyfill
+    }
+      ⁝
+</script>
+```
+
+A detailed example is available [here](https://undecaf.github.io/barcode-detector-polyfill/example-module/index.html).
 
 
 ## Using `BarcodeDetector`/`BarcodeDetectorPolyfill`
