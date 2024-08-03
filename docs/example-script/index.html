@@ -13,14 +13,15 @@
 
   <link rel="icon" type="image/png" href="img/favicon.png">
 
-  <script type="module" src="js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/index.js"></script>
 </head>
 
 <body>
 <div class="container">
   <h4>
     <code>BarcodeDetector</code> polyfill example,
-    <a href="https://www.npmjs.com/package/@undecaf/zbar-wasm"><code>zbar-wasm</code></a> loaded at runtime
+    <a href="https://www.npmjs.com/package/@undecaf/zbar-wasm"><code>zbar-wasm</code></a> in a plain script
   </h4>
 
   <div>Supported formats: <pre id="formats"></pre></div>
@@ -57,5 +58,8 @@
 
   <pre id="result"></pre>
 </div>
+
+<script src="js/main.js"></script>
+
 </body>
 </html>
