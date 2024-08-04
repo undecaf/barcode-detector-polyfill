@@ -53,26 +53,6 @@ try {
 ```
 
 
-### In a plain `<script>`
-
-Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/index.js"></script>
-<script>
-    try {
-        window['BarcodeDetector'].getSupportedFormats()
-    } catch {
-        window['BarcodeDetector'] = barcodeDetectorPolyfill.BarcodeDetectorPolyfill
-    }
-      ⁝
-</script>
-```
-
-A detailed example is available [here](https://undecaf.github.io/barcode-detector-polyfill/example-script/index.html).
-
-
 ### In a `<script type="module">`
 
 Import the `BarcodeDetectorPolyfill` API:
@@ -91,6 +71,26 @@ Import the `BarcodeDetectorPolyfill` API:
 ```
 
 A detailed example is available [here](https://undecaf.github.io/barcode-detector-polyfill/example-module/index.html).
+
+
+### In a plain `<script>`
+
+Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/index.js"></script>
+<script>
+    try {
+        window['BarcodeDetector'].getSupportedFormats()
+    } catch {
+        window['BarcodeDetector'] = barcodeDetectorPolyfill.BarcodeDetectorPolyfill
+    }
+      ⁝
+</script>
+```
+
+A detailed example is available [here](https://undecaf.github.io/barcode-detector-polyfill/example-script/index.html).
 
 
 ## Using `BarcodeDetector`/`BarcodeDetectorPolyfill`
