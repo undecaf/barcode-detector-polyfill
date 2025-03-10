@@ -52,6 +52,11 @@ try {
     ⁝
 ```
 
+Detailed examples are available [here](https://undecaf.github.io/barcode-detector-polyfill/example-loaded/)
+([source code](https://github.com/undecaf/barcode-detector-polyfill/tree/master/docs/example-loaded))
+and  [here](https://undecaf.github.io/barcode-detector-polyfill/example-bundled/)
+([source code](https://github.com/undecaf/barcode-detector-polyfill/tree/master/docs/example-bundled)).
+
 
 ### In a `<script type="module">`
 
@@ -70,7 +75,8 @@ Import the `BarcodeDetectorPolyfill` API:
 </script>
 ```
 
-A detailed example is available [here](https://undecaf.github.io/barcode-detector-polyfill/example-module/index.html).
+A detailed example is available [here](https://undecaf.github.io/barcode-detector-polyfill/example-module/index.html)
+([source code](https://github.com/undecaf/barcode-detector-polyfill/tree/master/docs/example-module)).
 
 
 ### In a plain `<script>`
@@ -90,7 +96,8 @@ Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 </script>
 ```
 
-A detailed example is available [here](https://undecaf.github.io/barcode-detector-polyfill/example-script/index.html).
+A detailed example is available [here](https://undecaf.github.io/barcode-detector-polyfill/example-script/index.html)
+([source code](https://github.com/undecaf/barcode-detector-polyfill/tree/master/docs/example-script)).
 
 
 ## Using `BarcodeDetector`/`BarcodeDetectorPolyfill`
