@@ -1,4 +1,4 @@
-import { BarcodeDetectorPolyfill } from "https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/main.js";
+import { BarcodeDetectorPolyfill } from 'https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/main.js'
 
 const el = {}
 
