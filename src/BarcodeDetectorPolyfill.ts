@@ -176,7 +176,7 @@ export class BarcodeDetectorPolyfill {
                 .then(() => canvasToImageData(image))
                 .finally(() => URL.revokeObjectURL(image.src))
 
-        } else if (source instanceof CanvasRenderingContext2D) {
+        } else if (typeof CanvasRenderingContext2D !== 'undefined' && source instanceof CanvasRenderingContext2D) {
             return Promise.resolve(source.getImageData(0, 0, source.canvas.width, source.canvas.height))
 
         } else {

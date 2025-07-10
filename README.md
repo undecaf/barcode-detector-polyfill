@@ -3,8 +3,8 @@
 ![Minified size](https://badgen.net/packagephobia/install/@undecaf/barcode-detector-polyfill?color=42cc24)
 ![Open issues](https://badgen.net/github/open-issues/undecaf/barcode-detector-polyfill)
 ![Vulnerabilities](https://snyk.io/test/npm/@undecaf/barcode-detector-polyfill/badge.svg)
-![Total downloads](https://badgen.net/npm/dt/@undecaf/barcode-detector-polyfill)
-[![](https://badgen.net/jsdelivr/hits/npm/@undecaf/barcode-detector-polyfill)](https://www.jsdelivr.com/package/npm/@undecaf/barcode-detector-polyfill)
+![Total npm downloads](https://badgen.net/npm/dt/@undecaf/barcode-detector-polyfill)
+[![Monthly jsDelivr downloads](https://badgen.net/jsdelivr/hits/npm/@undecaf/barcode-detector-polyfill)](https://www.jsdelivr.com/package/npm/@undecaf/barcode-detector-polyfill)
 ![License](https://badgen.net/github/license/undecaf/barcode-detector-polyfill)
 
 This package polyfills the [Barcode Detection API](https://developer.mozilla.org/en-US/docs/Web/API/Barcode_Detection_API) for browsers,
@@ -64,7 +64,7 @@ Import the `BarcodeDetectorPolyfill` API:
 
 ```html
 <script type="module">
-    import { BarcodeDetectorPolyfill } from "https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/main.js";
+    import { BarcodeDetectorPolyfill } from "https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.22/dist/main.js";
 
     try {
         window['BarcodeDetector'].getSupportedFormats()
@@ -85,7 +85,7 @@ Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.22/dist/index.js"></script>
 <script>
     try {
         window['BarcodeDetector'].getSupportedFormats()
