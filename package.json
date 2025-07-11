@@ -49,7 +49,7 @@
     "npm:pack": "npm pack"
   },
   "dependencies": {
-    "@undecaf/zbar-wasm": "^0.9.15"
+    "@undecaf/zbar-wasm": "^0.9.16"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^21.0.1",

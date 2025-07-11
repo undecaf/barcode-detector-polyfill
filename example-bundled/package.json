@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "@undecaf/barcode-detector-polyfill": "^0.9.22",
-    "@undecaf/zbar-wasm": "^0.9.15"
+    "@undecaf/zbar-wasm": "^0.9.16"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.1.1",
