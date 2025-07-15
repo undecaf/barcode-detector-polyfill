@@ -1,6 +1,6 @@
 {
   "name": "@undecaf/barcode-detector-polyfill",
-  "version": "0.9.22",
+  "version": "0.9.23",
   "description": "A WebAssembly polyfill for the Barcode Detection API",
   "keywords": [
     "polyfill",
@@ -57,6 +57,7 @@
     "@rollup/plugin-node-resolve": "^13.1.2",
     "@rollup/plugin-replace": "^3.0.1",
     "@types/chai": "^4.3.0",
+    "@types/dom-webcodecs": "^0.1.15",
     "@types/mocha": "^9.0.0",
     "@types/offscreencanvas": "^2019.6.4",
     "chai": "^4.3.4",

@@ -13,6 +13,16 @@ import { Canvas, newCanvas } from '@/Canvas'
 
 
 /**
+ * Parameter type of {@link BarcodeDetectorPolyfill.detect}
+ */
+type PolyfillImageBitmapSource =
+    | CanvasImageSourceWebCodecs
+    | CanvasRenderingContext2D
+    | { width: number }
+    | { height: number };
+
+
+/**
  * A polyfill for {@link external:BarcodeDetector}.
  *
  * @see https://wicg.github.io/shape-detection-api/#barcode-detection-api
@@ -63,17 +73,17 @@ export class BarcodeDetectorPolyfill {
     /**
      * Scans an image for barcodes and returns a {@link Promise} for the result.
      *
-     * @param {ImageBitmapSource} source the image to be scanned
+     * @param {PolyfillImageBitmapSource} source the image to be scanned
      * @returns {Promise<Array<DetectedBarcode>>} the scan result as described for {@link BarcodeDetector},
      *  or a rejected {@link Promise} containing the error
-     * @throws {TypeError} if the argument is not an {@link ImageBitmapSource}
+     *
+     * @throws {TypeError} if the argument is not an {@link PolyfillImageBitmapSource}
+     * @throws {DOMException} if the argument is in an invalid state for detection
      */
     // TODO Enable cache for video source, disable for others unless overridden in zbarConfig
-    detect(source: ImageBitmapSource): Promise<Array<DetectedBarcode>> {
-        // Assert the argument type
-        if (!BarcodeDetectorPolyfill.isImageBitmapSource(source)) {
-            throw new TypeError('BarcodeDetector.detect() argument is not an ImageBitmapSource')
-        }
+    detect(source: PolyfillImageBitmapSource): Promise<Array<DetectedBarcode>> {
+        // Validate the argument type and state
+        BarcodeDetectorPolyfill.validate(source)
 
         // Return an empty array immediately if the source is an object with any zero dimension,
         // see https://wicg.github.io/shape-detection-api/#image-sources-for-detection
@@ -113,7 +123,6 @@ export class BarcodeDetectorPolyfill {
                 return Promise.reject(error)
             }
         }
-
     }
 
 
@@ -141,11 +150,11 @@ export class BarcodeDetectorPolyfill {
 
 
     /**
-     * Converts any {@link external:ImageBitmapSource} to an {@link ImageData} instance.
+     * Converts any {@link PolyfillImageBitmapSource} to an {@link ImageData} instance.
      */
-    private toImageData(source: ImageBitmapSource): Promise<ImageData> {
+    private toImageData(source: PolyfillImageBitmapSource): Promise<ImageData> {
 
-        const canvasToImageData = (src: CanvasImageSource): ImageData => {
+        const canvasToImageData = (src: CanvasImageSourceWebCodecs): ImageData => {
             // Draw on the canvas in the natural size of the source
             const intrinsic = BarcodeDetectorPolyfill.intrinsicDimensions(src)
 
@@ -168,19 +177,25 @@ export class BarcodeDetectorPolyfill {
             return Promise.resolve(source as ImageData)
 
         } else if (source instanceof Blob) {
-            const image = document.createElement('img')
-            image.src = URL.createObjectURL(source)
+            if (typeof createImageBitmap === 'function') {
+                return createImageBitmap(source)
+                    .then((imageBitmap) => canvasToImageData(imageBitmap))
 
-            return image
-                .decode()
-                .then(() => canvasToImageData(image))
-                .finally(() => URL.revokeObjectURL(image.src))
+            } else {
+                const image = document.createElement('img')
+                image.src = URL.createObjectURL(source)
 
-        } else if (typeof CanvasRenderingContext2D !== 'undefined' && source instanceof CanvasRenderingContext2D) {
+                return image
+                    .decode()
+                    .then(() => canvasToImageData(image))
+                    .finally(() => URL.revokeObjectURL(image.src))
+            }
+
+        } else if (BarcodeDetectorPolyfill.isRenderingContext(source)) {
             return Promise.resolve(source.getImageData(0, 0, source.canvas.width, source.canvas.height))
 
         } else {
-            return Promise.resolve(canvasToImageData(source as CanvasImageSource))
+            return Promise.resolve(canvasToImageData(source as CanvasImageSourceWebCodecs))
         }
     }
 
@@ -226,31 +241,79 @@ export class BarcodeDetectorPolyfill {
 
 
     /**
-     * Type guard for {@link external:ImageBitmapSource} and any
-     * object having zero width or height.
+     * Validates the argument of {@link BarcodeDetectorPolyfill.detect()}
+     * against <a href="https://developer.mozilla.org/en-US/docs/Web/API/BarcodeDetector/detect#exceptions>
+     * these constraints</a> as good as possible.
+     * Also acts as a type guard for type {@link PolyfillImageBitmapSource}.
+     *
+     * @throws {TypeError} if the argument is not an {@link PolyfillImageBitmapSource}
+     * @throws {DOMException} if the argument is in an invalid state for detection
      */
-    private static isImageBitmapSource(source: any): source is ImageBitmapSource {
-        return (typeof HTMLImageElement !== 'undefined' && source instanceof HTMLImageElement)
-            || (typeof HTMLVideoElement !== 'undefined' && source instanceof HTMLVideoElement)
-            || (typeof HTMLCanvasElement !== 'undefined' && source instanceof HTMLCanvasElement)
-            || (typeof CanvasRenderingContext2D !== 'undefined' && source instanceof CanvasRenderingContext2D)
-            || (typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap)
-            || (source instanceof ImageData)
-            || (source instanceof Blob)
-            // Note the (lenient) equality operator
-            || (source && source.width == 0)
-            || (source && source.height == 0)
+    private static validate(source: any): source is PolyfillImageBitmapSource {
+        // The argument must be a `PolyfillImageBitmapSource`
+        if (!BarcodeDetectorPolyfill.isPolyfillImageBitmapSource(source)) {
+            throw new TypeError('BarcodeDetector.detect() argument is not an ImageBitmapSource')
+        }
+
+        // `HTMLImageElement.complete` must be `true`
+        if (typeof HTMLImageElement !== 'undefined' && source instanceof HTMLImageElement && !source.complete) {
+            throw new DOMException(`HTMLImageElement has invalid complete state: ${source.complete}`, 'InvalidStateError')
+        }
+
+        //  `HTMLVideoElement.readyState` must not be `HTMLMediaElement.HAVE_NOTHING` or `HTMLMediaElement.HAVE_METADATA`
+        if (typeof HTMLVideoElement !== 'undefined' && source instanceof HTMLVideoElement
+            && [HTMLMediaElement.HAVE_NOTHING, HTMLMediaElement.HAVE_METADATA].includes(source.readyState)) {
+            throw new DOMException(`HTMLVideoElement has invalid readyState: ${source.readyState}`, 'InvalidStateError')
+        }
+
+        // If we arrived here then the argument is actually a `PolyfillImageBitmapSource`
+        return true
     }
 
 
     /**
-     * Returns the intrinsic (as opposed to the rendered)
-     * dimensions of an {@link external:ImageBitmapSource}.
+     * Type guard for {@link external:CanvasRenderingContext2D}
+     * and {@link external:OffscreenCanvasRenderingContext2D}.
      */
-    private static intrinsicDimensions(source: ImageBitmapSource): { width: number, height: number } {
+    private static isRenderingContext(source: any): source is CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D {
+        return (typeof CanvasRenderingContext2D !== 'undefined' && source instanceof CanvasRenderingContext2D)
+            || (typeof OffscreenCanvasRenderingContext2D !== 'undefined' && source instanceof OffscreenCanvasRenderingContext2D)
+    }
+
+
+    /**
+     * Type guard for type {@link PolyfillImageBitmapSource}.
+     */
+    private static isPolyfillImageBitmapSource(source: any): source is PolyfillImageBitmapSource {
+        return (typeof HTMLImageElement !== 'undefined' && source instanceof HTMLImageElement)
+            || (typeof HTMLVideoElement !== 'undefined' && source instanceof HTMLVideoElement)
+            || (typeof HTMLCanvasElement !== 'undefined' && source instanceof HTMLCanvasElement)
+            || (typeof SVGImageElement !== 'undefined' && source instanceof SVGImageElement)
+            || (typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap)
+            || (typeof OffscreenCanvas !== 'undefined' && source instanceof OffscreenCanvas)
+            || (typeof VideoFrame !== 'undefined' && source instanceof VideoFrame)
+            || BarcodeDetectorPolyfill.isRenderingContext(source)
+            || (source instanceof ImageData)
+            || (source instanceof Blob)
+            // Note the (lenient) equality operator
+            || (source && (source['width'] == 0 || source['height'] == 0))
+    }
+
+
+    /**
+     * Returns the intrinsic (as opposed to the rendered) dimensions
+     * of a {@link external:CanvasImageSourceWebCodecs} object.
+     */
+    private static intrinsicDimensions(source: PolyfillImageBitmapSource): { width: number, height: number } {
+        if (BarcodeDetectorPolyfill.isRenderingContext(source)) {
+            source = source.canvas
+        }
+
         return {
-            width: Number(source['naturalWidth'] || source['videoWidth'] || source['width']),
-            height: Number(source['naturalHeight'] || source['videoHeight'] || source['height'])
+            width: Number(source['naturalWidth'] || source['videoWidth'] || source['codedWidth']
+                || source['clientWidth'] || source['width']),
+            height: Number(source['naturalHeight'] || source['videoHeight'] || source['codedHeight']
+                || source['clientHeight'] || source['height'])
         }
     }
 

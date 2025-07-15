@@ -18,6 +18,7 @@ It offers the following features:
   `qr_code`, `sq_code`, `upc_a`, `upc_e`
 + Not supported: `aztec`, `data_matrix`, `pdf417`
 + Scans `<img>`, `<canvas>` and live `<video>` elements, image and video `Blob`s and `File`s and more
++ Can be used in [Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
 + Detects multiple barcodes per frame, also with different types
 + Barcodes may be oriented horizontally or vertically
 + Outperforms pure JavaScript polyfills
@@ -64,7 +65,7 @@ Import the `BarcodeDetectorPolyfill` API:
 
 ```html
 <script type="module">
-    import { BarcodeDetectorPolyfill } from "https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.22/dist/main.js";
+    import { BarcodeDetectorPolyfill } from "https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.23/dist/main.js";
 
     try {
         window['BarcodeDetector'].getSupportedFormats()
@@ -85,7 +86,7 @@ Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.22/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.23/dist/index.js"></script>
 <script>
     try {
         window['BarcodeDetector'].getSupportedFormats()
@@ -144,15 +145,24 @@ can be obtained, or else a
 [`TypeError`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError)
 will be thrown:
 
-+ an `<img>` element ([`HTMLImageElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement))
-+ a `<video>` element ([`HTMLVideoElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement))
-  from which a single frame will be taken
++ an `<img>` element ([`HTMLImageElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement)),
+  must be completely loaded, or else a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException)
+  will be thrown as `InvalidStateError`
++ a SVG `<image>` element ([`SVGImageElement`](https://developer.mozilla.org/en-US/docs/Web/API/SVGImageElement))
 + a `<canvas>` element ([`HTMLCanvasElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement))
-+ an [`ImageBitmap`](https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap)
-+ an [`ImageData`](https://developer.mozilla.org/en-US/docs/Web/API/ImageData) instance
 + a [`CanvasRenderingContext2D`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D)
++ an [`OffscreenCanvas`](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) ①
++ an [`OffscreenCanvasRenderingContext2D`](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvasRenderingContext2D) ①
++ a `<video>` element ([`HTMLVideoElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement)) from which a single frame will be taken. The video
+  must be playing, or else a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) will be thrown
+  as `InvalidStateError`
++ a [`VideoFrame`](https://developer.mozilla.org/en-US/docs/Web/API/VideoFrame) ①
++ an [`ImageBitmap`](https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap) ①
++ an [`ImageData`](https://developer.mozilla.org/en-US/docs/Web/API/ImageData) instance ①
 + a [`Blob`](https://developer.mozilla.org/en-US/docs/Web/API/Blob) or a 
-  [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) with a content `type` of `image/*`
+  [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) with a content `type` of `image/*` ①
+
+① Also available in Web Workers
 
 In addition, any object with a zero `width` or `height` property will be tolerated.
 
@@ -179,6 +189,10 @@ Additional properties provided only by `BarcodeDetectorPolyfill`:
 If an error occurs during barcode detection then the `detect()` method returns a rejected
 [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 containing the error.
+
+Peculiarities owed to the underlying [ZBar Bar Code Reader](https://github.com/mchehab/zbar#readme):
++ `ISBN-10` will be scanned as `ISBN-13` or `EAN-13` if these are among the accepted `formats`
++ `EAN-13+*` will be scanned as `ISBN-13+*` if any `ISBN-*` is among the accepted `formats`
 
 
 ### Typescript support
