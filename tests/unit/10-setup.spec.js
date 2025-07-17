@@ -1,34 +1,17 @@
 import pkgLock from '../../package-lock.json'
 import { expect } from 'chai'
 import {
+    supportedFormats, unsupportedFormats, imageUrl, imageScales, image, imageData, imageWidth, imageHeight,
+    canvas, context, videoUrl, videoScales
+} from './setup-init.js'
+import {
     BarcodeDetectorPolyfill, ZBAR_WASM_PKG_NAME, ZBAR_WASM_VERSION, ZBAR_WASM_REPOSITORY
 } from '@undecaf/barcode-detector-polyfill'
 
 
 describe('BarcodeDetectorPolyfill setup', () => {
 
-    const imgUrl = '/media/code_39.png'
-    const videoUrl = `${imgUrl}.mp4`
-    const videoWidth = 640
-    const videoHeight = 480
-
-    const unsupportedFormats = [ '', [], ['unsupported'] ]
-    const imgScales = [ 1, 10 ]
-    const videoScales = [ 1, 3 ]
-
-    let imgWidth, imgHeight
-
     let detector
-
-
-    before(async () => {
-        const img = document.createElement('img')
-        img.src = imgUrl
-        await img.decode()
-        imgWidth = img.naturalWidth
-        imgHeight = img.naturalHeight
-    })
-
 
     beforeEach(() => {
         detector = new BarcodeDetectorPolyfill()
@@ -39,13 +22,18 @@ describe('BarcodeDetectorPolyfill setup', () => {
         expect(ZBAR_WASM_PKG_NAME).to.equal('@undecaf/zbar-wasm')
         expect(ZBAR_WASM_VERSION).to.equal(pkgLock.dependencies[ZBAR_WASM_PKG_NAME].version)
         expect(ZBAR_WASM_REPOSITORY).to.equal(`https://cdn.jsdelivr.net/npm/${ZBAR_WASM_PKG_NAME}@${ZBAR_WASM_VERSION}`)
-    })
+    });
 
 
-    it('provides the BarcodeDetector API', async () => {
+    it('provides the BarcodeDetector API', () => {
         expect(BarcodeDetectorPolyfill).itself.to.respondTo('getSupportedFormats')
         expect(detector).to.be.an('object')
         expect(detector).to.respondTo('detect')
+    });
+
+
+    it('supports the specified formats', async () => {
+        expect(await BarcodeDetectorPolyfill.getSupportedFormats()).to.include.members(supportedFormats)
     });
 
 
@@ -53,96 +41,81 @@ describe('BarcodeDetectorPolyfill setup', () => {
         it(`rejects formats ${JSON.stringify(formats)}`, () => {
             expect(() => new BarcodeDetectorPolyfill({ formats })).to.throw(TypeError)
         })
-    })
+    });
 
 
     it('accepts ImageData sources', async () => {
-        const src = new ImageData(10, 10);
-
-        expect(await detector.toImageData(src)).to.equal(src)
-    })
+        expect(await detector.toImageData(imageData)).to.eql(imageData)
+    });
 
 
     it('accepts Blob sources', async () => {
-        const blob = await (await fetch(imgUrl)).blob()
+        const blob = await (await fetch(imageUrl)).blob()
 
-        const imageData = await detector.toImageData(blob)
+        const result = await detector.toImageData(blob)
 
-        expect(imageData.width).to.equal(imgWidth)
-        expect(imageData.height).to.equal(imgHeight)
-    })
-
-
-    // Running this test on browsers that do not support createImageBitmap()
-    // is pointless because createImageBitmap() polyfills do not return actual
-    // ImageBitmap instances but usually only Image instances which are already
-    // covered by other tests
-    if (typeof window['createImageBitmap'] === 'function') {
-        it('accepts ImageBitmap sources', async () => {
-            const img = document.createElement('img')
-            img.src = imgUrl
-            await img.decode()
-            const bitmap = await createImageBitmap(img)
-
-            const imageData = await detector.toImageData(bitmap)
-
-            expect(imageData.width).to.equal(imgWidth)
-            expect(imageData.height).to.equal(imgHeight)
-        })
-    }
+        expect(result).to.eql(imageData)
+    });
 
 
-    imgScales.forEach(scale => {
-        it(`accepts <img> sources resized 1:${scale} and uses natural dimensions`, async () => {
-            const img = document.createElement('img')
-            img.src = imgUrl
-            await img.decode()
-            img.width /= scale
-            img.height /= scale
-
-            const imageData = await detector.toImageData(img)
-
-            expect(imageData.width).to.equal(imgWidth)
-            expect(imageData.height).to.equal(imgHeight)
-        })
-    })
-
-
-    it('accepts <canvas> sources', async () => {
+    it('accepts OffscreenCanvas sources', async () => {
         const
-            canvas = document.createElement('canvas'),
-            ctx = canvas.getContext('2d'),
-            img = document.createElement('img')
-        img.src = imgUrl
-        await img.decode()
+            offscreenCanvas = new OffscreenCanvas(image.naturalWidth, image.naturalHeight),
+            offscreenContext = offscreenCanvas.getContext('2d');
 
-        canvas.width = img.naturalWidth
-        canvas.height = img.naturalHeight
-        ctx.drawImage(img, 0, 0)
+        offscreenContext.drawImage(image, 0, 0)
 
-        const imageData = await detector.toImageData(canvas)
+        const result = await detector.toImageData(offscreenCanvas)
 
-        expect(imageData.width).to.equal(imgWidth)
-        expect(imageData.height).to.equal(imgHeight)
+        expect(result).to.eql(imageData)
     });
 
 
     it('accepts CanvasRenderingContext2D sources', async () => {
+        const result = await detector.toImageData(context)
+
+        expect(result).to.eql(imageData)
+    });
+
+
+    it('accepts ImageBitmap sources', async () => {
         const
-            canvas = document.createElement('canvas'),
-            ctx = canvas.getContext('2d'),
-            img = document.createElement('img')
-        img.src = imgUrl
-        await img.decode()
+            bitmap = await createImageBitmap(image),
+            result = await detector.toImageData(bitmap);
 
-        canvas.width = img.naturalWidth
-        canvas.height = img.naturalHeight
-        ctx.drawImage(img, 0, 0)
+        expect(result).to.eql(imageData)
+    })
 
-        const imageData = await detector.toImageData(ctx)
 
-        expect(imageData.width).to.equal(imgWidth)
-        expect(imageData.height).to.equal(imgHeight)
+    it('accepts VideoFrame sources', async () => {
+        const
+            bitmap = await createImageBitmap(imageData),
+            videoFrame = new VideoFrame(bitmap, { timestamp: 0 }),
+            result = await detector.toImageData(canvas);
+
+        expect(result).to.eql(imageData)
+    });
+
+
+    it('accepts <canvas> sources', async () => {
+        const result = await detector.toImageData(canvas)
+
+        expect(result).to.eql(imageData)
+    });
+
+
+    imageScales.forEach(scale => {
+        it(`accepts <img> sources resized 1:${scale} and uses natural dimensions`, async () => {
+            const img = document.createElement('img')
+            img.src = imageUrl
+            await img.decode()
+            img.width /= scale
+            img.height /= scale
+
+            const result = await detector.toImageData(img)
+
+            expect(result).to.eql(imageData)
+        })
     });
 
 
@@ -158,11 +131,11 @@ describe('BarcodeDetectorPolyfill setup', () => {
             video.play()
             await playing
 
-            const imageData = await detector.toImageData(video)
+            const result = await detector.toImageData(video)
 
-            expect(imageData.width).to.equal(videoWidth)
-            expect(imageData.height).to.equal(videoHeight)
+            expect(result.width).to.equal(video.videoWidth)
+            expect(result.height).to.equal(video.videoHeight)
         })
-    })
+    });
 
 })

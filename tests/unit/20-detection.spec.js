@@ -1,119 +1,132 @@
 import { BarcodeDetectorPolyfill, Orientation } from '@undecaf/barcode-detector-polyfill'
-
-
-class BarcodeTest {
-
-    constructor(filename, expectedRawValues, expectedFormats = [filename.split(/\./)[0]]) {
-        this.filename = filename
-        this.format = [filename.split(/\./)[0]]
-        this.filePath = `/media/${filename}.png`
-        this.expectedRawValues = Array.isArray(expectedRawValues) ? expectedRawValues : [expectedRawValues]
-        this.expectedFormats = Array.isArray(expectedFormats) ? expectedFormats : [expectedFormats]
-    }
-
-}
+import { BarcodeTest, tests, encodingTests, verify } from './detection-init.js'
 
 
 describe('BarcodeDetectorPolyfill detection', () => {
 
-    let tests = [
-        new BarcodeTest('codabar', 'A967072A'),
-        new BarcodeTest('code_39', 'LOREM-1234'),
-        new BarcodeTest('code_93', 'LOREM+/-12345'),
-        new BarcodeTest('code_128', 'Lorem-ipsum-12345'),
-        new BarcodeTest('databar', '0101234567890128'),
-        new BarcodeTest('databar_exp', '0101234567890128-Lorem'),
-        new BarcodeTest('ean_8', '91827357'),
-        new BarcodeTest('ean_13', '9081726354425'),
-        new BarcodeTest('ean_13+2', ['9781234567897', '12'], ['ean_13', 'ean_2']),
-        new BarcodeTest('ean_13+5', ['9781234567897', '12345'], ['ean_13', 'ean_5']),
-        new BarcodeTest('isbn_10', '123456789X'),
-        new BarcodeTest('isbn_13', '9781234567897'),
-        new BarcodeTest('isbn_13+2', ['9781234567897', '12'], ['isbn_13', 'ean_2']),
-        new BarcodeTest('isbn_13+5', ['9781234567897', '12345'], ['isbn_13', 'ean_5']),
-        new BarcodeTest('itf', '123456789098765432'),
-        new BarcodeTest('qr_code', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'),
-        new BarcodeTest('qr_code.utf8-1', 'ÄÖÜ äöü ß ÁÉÍÓÚ áéíóú ÀÈÌÒÙ àéíóú'),
-        new BarcodeTest('qr_code.utf8-2', 'Thôn Hoan Trung, Chiến Thắng, Bắc Sơn, Lạng Sơn'),
-        new BarcodeTest('upc_a', '162738495012'),
-        new BarcodeTest('upc_e', '09876547'),
-    ]
-
-    let encodingTests = [
-        new BarcodeTest('qr_code.utf8-1', 'ÄÖÜ äöü ß ÁÉÍÓÚ áéíóú ÀÈÌÒÙ àéíóú'),
-        new BarcodeTest('qr_code.utf8-2', 'Thôn Hoan Trung, Chiến Thắng, Bắc Sơn, Lạng Sơn'),
-    ]
-
-    let supportedFormats
-
-
-    before(async () => {
-        supportedFormats = await BarcodeDetectorPolyfill.getSupportedFormats()
-    })
-
-
     async function loadImage(test) {
         const img = document.createElement('img')
+
         img.src = test.filePath
         await img.decode()
+
         return img
+    }
+
+
+    async function loadImageBitmap(test) {
+        return await createImageBitmap(await loadBlob(test))
+    }
+
+
+    async function loadImageData(test) {
+        const context = await loadOffscreenCanvasRenderingContext2D(test)
+
+        return context.getImageData(0, 0, context.canvas.width, context.canvas.height)
+    }
+
+
+    async function loadCanvasRenderingContext2D(test) {
+        const
+            canvas = document.createElement('canvas'),
+            context = canvas.getContext('2d'),
+            image = await loadImage(test);
+
+        canvas.width = image.naturalWidth
+        canvas.height = image.naturalHeight
+        context.drawImage(image, 0, 0)
+
+        return context
+    }
+
+
+    async function loadCanvas(test) {
+        return (await loadCanvasRenderingContext2D(test)).canvas
+    }
+
+
+    async function loadOffscreenCanvasRenderingContext2D(test) {
+        const
+            image = await loadImage(test),
+            canvas = new OffscreenCanvas(image.naturalWidth, image.naturalHeight),
+            context = canvas.getContext('2d');
+
+        context.drawImage(image, 0, 0)
+
+        return context
+    }
+
+
+    async function loadOffscreenCanvas(test) {
+        return (await loadOffscreenCanvasRenderingContext2D(test)).canvas
     }
 
 
     async function loadVideo(test) {
         const
             video = document.createElement('video'),
-            playing = new Promise(resolve => video.addEventListener('playing', resolve))
+            playing = new Promise(resolve => video.addEventListener('playing', resolve));
+
         video.src = `${test.filePath}.mp4`
         video.muted = true
         video.play()
         await playing
+
         return video
     }
 
 
-    async function loadCanvas(test) {
-        const
-            canvas = document.createElement('canvas'),
-            ctx = canvas.getContext('2d'),
-            img = await loadImage(test)
-
-        canvas.width = img.naturalWidth
-        canvas.height = img.naturalHeight
-        ctx.drawImage(img, 0, 0)
-        return canvas
+    async function loadVideoFrame(test) {
+        return new VideoFrame(await loadImageBitmap(test), { timestamp: 0 })
     }
 
 
-    function verify(barcodes, test) {
-        expect(barcodes).to.be.an('array').that.has.lengthOf(test.expectedRawValues.length)
-        barcodes.forEach(barcode => {
-            expect(barcode.format).to.be.oneOf(test.expectedFormats)
-            expect(barcode.rawValue).to.be.oneOf(test.expectedRawValues)
-        })
+    async function loadBlob(test) {
+        return await (await fetch(test.filePath)).blob()
     }
+
+
+    function loadedType(loader) {
+        return loader.name.replace('load', '')
+    }
+
+
+    const loaders = [
+        loadImage,
+        loadImageBitmap,
+        loadImageData,
+        loadCanvasRenderingContext2D,
+        loadCanvas,
+        loadOffscreenCanvasRenderingContext2D,
+        loadOffscreenCanvas,
+        loadVideo,
+        loadVideoFrame,
+        loadBlob,
+    ]
 
 
     it('supports the required barcode formats', async () => {
         const formats = await BarcodeDetectorPolyfill.getSupportedFormats()
 
         tests.forEach(test => {
-            expect(test.format[0]).to.be.oneOf(formats)
+            expect(test.formats[0]).to.be.oneOf(formats)
         })
     })
 
 
     tests
-        .forEach(test =>
-            it(`detects ${test.filename} in <img> explicitly`, async () => {
-                const img = await loadImage(test)
+        .forEach(test => loaders
+            .forEach(loader =>
+                it(`detects requested ${test.filename} in ${loadedType(loader)}`, async () => {
+                    const
+                        detector = new BarcodeDetectorPolyfill({formats: test.formats}),
+                        source = await loader(test),
+                    barcodes = await detector.detect(source);
 
-                const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                const barcodes = await detector.detect(img)
-
-                verify(barcodes, test)
-            })
-        )
+                    verify(barcodes, test)
+                })
+            )
+        );
 
 
     tests
@@ -123,140 +136,48 @@ describe('BarcodeDetectorPolyfill detection', () => {
         // EAN-13+* will be scanned as ISBN-13+* if any ISBN-* is among the accepted formats
         .filter(test => !test.filename.startsWith('ean_13+'))
 
-        .forEach(test => {
-            it(`detects ${test.filename} in <img> among all formats`, async () => {
-                const img = await loadImage(test)
-
-                const detector = new BarcodeDetectorPolyfill({...test, format: undefined})
-                const barcodes = await detector.detect(img)
-
-                verify(barcodes, test)
-            })
-        });
-
-
-    [tests[0]]
-        .forEach(test => {
-            it(`${test.filename} is unaffected by <img> resizing`, async () => {
-                const test = tests[0]
-                const img = await loadImage(test)
-
-                const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                const original = await detector.detect(img)
-
-                verify(original, test)
-
-                img.width /= 50
-                img.height /= 30
-                const resized = await detector.detect(img)
-
-                expect(resized).to.deep.equal(original)
-            })
-        });
-
-
-    tests
-        .forEach(test => {
-            it(`detects ${test.filename} in <video> explicitly`, async () => {
-                const video = await loadVideo(test)
-
-                const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                const barcodes = await detector.detect(video)
-
-                verify(barcodes, test)
-            })
-        });
-
-
-    [tests[0]]
-        .forEach(test => {
-            it(`${test.filename} is unaffected by <video> resizing`, async () => {
-                const video = await loadVideo(test)
-
-                const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                const original = await detector.detect(video)
-
-                verify(original, test)
-
-                video.width /= 50
-                video.height /= 30
-                const resized = await detector.detect(video)
-
-                expect(resized).to.deep.equal(original)
-            });
-        });
-
-
-    [tests[0]]
-        .forEach(test => {
-            it(`detects ${test.filename} on <canvas> explicitly`, async () => {
-                const canvas = await loadCanvas(test)
-
-                const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                const barcodes = await detector.detect(canvas)
-
-                verify(barcodes, test)
-            })
-        });
-
-
-    [tests[0]]
-        .forEach(test => {
-            it(`detects ${test.filename} in CanvasRenderingContext2D explicitly`, async () => {
-                const canvas = await loadCanvas(test)
-
-                const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                const barcodes = await detector.detect(canvas.getContext('2d'))
-
-                verify(barcodes, test)
-            })
-        });
-
-
-    [tests[0]]
-        .forEach(test => {
-            it(`detects ${test.filename} in Blob explicitly`, async () => {
-                const blob = await (await fetch(test.filePath)).blob()
-
-                const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                const barcodes = await detector.detect(blob)
-
-                verify(barcodes, test)
-            })
-        });
-
-
-    // Running this test on browsers that do not support createImageBitmap()
-    // is pointless because createImageBitmap() polyfills do not return actual
-    // ImageBitmap instances but usually only Image instances which are already
-    // covered by other tests
-    if (typeof window['createImageBitmap'] === 'function') {
-        [tests[0]]
-            .forEach(test => {
-                it(`detects ${test.filename} in ImageBitmap explicitly`, async () => {
-                    const bitmap = await createImageBitmap(await loadImage(test))
-
-                    const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                    const barcodes = await detector.detect(bitmap)
+        .forEach(test => loaders
+            .forEach(loader =>
+                it(`detects ${test.filename} in ${loadedType(loader)} automatically`, async () => {
+                    const
+                        detector = new BarcodeDetectorPolyfill(),
+                        source = await loader(test),
+                        barcodes = await detector.detect(source);
 
                     verify(barcodes, test)
                 })
-            })
-    }
+            )
+        );
 
 
-    [tests[0]]
-        .forEach(test => {
-            it(`detects ${test.filename} in ImageData explicitly`, async () => {
-                const canvas = await loadCanvas(test)
+    tests
+        // ISBN-10 will be scanned as ISBN-13 or EAN-13 if these are among the accepted formats
+        .filter(test => test.filename !== 'isbn_10')
 
-                const detector = new BarcodeDetectorPolyfill({formats: test.format})
-                const barcodes = await detector.detect(
-                    canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height))
+        // EAN-13+* will be scanned as ISBN-13+* if any ISBN-* is among the accepted formats
+        .filter(test => !test.filename.startsWith('ean_13+'))
 
-                verify(barcodes, test)
-            })
-        });
+        .forEach(test => [loadImage, loadVideo]
+            .forEach(loader =>
+                it(`${test.filename} is unaffected by ${loadedType(loader)} resizing`, async () => {
+                    const
+                        source = await loader(test),
+                        originalDetector = new BarcodeDetectorPolyfill({}),
+                        original = await originalDetector.detect(source);
+
+                    verify(original, test)
+
+                    source.width /= 50
+                    source.height /= 30
+
+                    const
+                        resizedDetector = new BarcodeDetectorPolyfill({}),
+                        resized = await resizedDetector.detect(source)
+
+                    expect(resized).to.eql(original)
+                })
+            )
+        );
 
 
     encodingTests
@@ -264,12 +185,12 @@ describe('BarcodeDetectorPolyfill detection', () => {
             it('handles UTF-8 encoding', async () => {
                 const img = await loadImage(test)
 
-                let detector = new BarcodeDetectorPolyfill({formats: test.format})
+                let detector = new BarcodeDetectorPolyfill({formats: test.formats})
                 let barcodes = await detector.detect(img)
 
                 verify(barcodes, test)
 
-                detector = new BarcodeDetectorPolyfill({formats: test.format, zbar: {encoding: 'iso-8859-15'}})
+                detector = new BarcodeDetectorPolyfill({formats: test.formats, zbar: {encoding: 'iso-8859-15'}})
                 barcodes = await detector.detect(img)
 
                 barcodes.forEach(barcode => {
@@ -288,11 +209,11 @@ describe('BarcodeDetectorPolyfill detection', () => {
         }
         const test = {
             ...new BarcodeTest('code_39x4', [], 'code_39'),
-            format: ['code_39']
+            formats: ['code_39']
         }
         const img = await loadImage(test)
 
-        const detector = new BarcodeDetectorPolyfill({formats: test.format})
+        const detector = new BarcodeDetectorPolyfill({formats: test.formats})
         const barcodes = await detector.detect(img)
 
         expect(barcodes).to.be.an('array').that.has.lengthOf(Object.keys(orientations).length)
@@ -300,28 +221,28 @@ describe('BarcodeDetectorPolyfill detection', () => {
             expect(barcode.format).to.be.oneOf(test.expectedFormats)
             expect(barcode.orientation).to.equal(orientations[barcode.rawValue])
         })
-    })
+    });
 
 
     it('detects symbol quality', async () => {
         const expectedOrder = ['SMALL', 'MEDIUM', 'LARGE']
         const test = {
             ...new BarcodeTest('code_39x3', [], 'code_39'),
-            format: ['code_39']
+            formats: ['code_39']
         }
         const img = await loadImage(test)
 
-        const detector = new BarcodeDetectorPolyfill({formats: test.format})
+        const detector = new BarcodeDetectorPolyfill({formats: test.formats})
         const barcodes = await detector.detect(img)
 
         expect(barcodes).to.be.an('array').that.has.lengthOf(3)
         const actualOrder = barcodes.sort(
             (bc1, bc2) => bc1.quality - bc2.quality).map(barcode => barcode.rawValue)
-        expect(actualOrder).to.deep.equal(expectedOrder)
+        expect(actualOrder).to.eql(expectedOrder)
     });
 
 
-    [{width: 0}, {height: '0'}]
+    [{width: 0}, {width: '0'}, {height: 0}, {height: '0'}]
         .forEach(source => {
             it(`accepts ${JSON.stringify(source)} as source`, async () => {
                 const detector = new BarcodeDetectorPolyfill()
@@ -335,10 +256,10 @@ describe('BarcodeDetectorPolyfill detection', () => {
 
     [undefined, null, '', 0, {}, { width: 1 }]
         .forEach(source => {
-            it(`throws a TypeError if the detect() argument is ${source}`, async () => {
-                const detector = new BarcodeDetectorPolyfill({formats: tests[0].format})
+            it(`throws a TypeError if the detect() argument is ${JSON.stringify(source)}`, async () => {
+                const detector = new BarcodeDetectorPolyfill({formats: tests[0].formats})
                 try {
-                    detector.detect(source)
+                    await detector.detect(source)
 
                 } catch (error) {
                     expect(error instanceof TypeError).to.equal(true, `Exception is not a TypeError but ${error}`)
@@ -352,17 +273,37 @@ describe('BarcodeDetectorPolyfill detection', () => {
 
     [
         document.createElement('img'),
-        document.createElement('video'),
+        document.createElement('video')
+    ]
+        .forEach(source => {
+            it(`throws a DOMException for an ${source.constructor.name} with invalid state`, async () => {
+                source.src = '/'
+                const detector = new BarcodeDetectorPolyfill({formats: tests[0].formats})
+                try {
+                    await detector.detect(source)
+
+                } catch (error) {
+                    expect(error instanceof DOMException).to.equal(true, `Exception is not a DOMException but ${error}`)
+                    return
+                }
+
+                expect.fail('No exception was thrown')
+            })
+        });
+
+
+    [
+        document.createElement('img'),
         document.createElement('canvas'),
         new Blob(),
     ]
         .forEach(source => {
-            it(`returns a rejected Promise for an invalid ${source}`, () => {
-                const detector = new BarcodeDetectorPolyfill({formats: tests[0].format})
+            it(`returns a rejected Promise for an invalid ${source.constructor.name}`, () => {
+                const detector = new BarcodeDetectorPolyfill({formats: tests[0].formats})
                 detector.detect(source)
                     .then((result) => expect(false).to.equal(true, `Promise not rejected but resolved with ${result}`))
                     .catch(() => {})
             })
-        })
+        });
 
 })

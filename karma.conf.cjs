@@ -17,7 +17,7 @@ module.exports = function(config) {
         // Files to load into the browser (including required() files)
         files: [
             {
-                pattern: 'tests/unit/**/*.spec.*',
+                pattern: 'tests/unit/**/*.js',
                 type: 'module',
             },
             {
@@ -40,6 +40,7 @@ module.exports = function(config) {
         proxies: {
             '/base/tests/unit/zbar.wasm': `/base/node_modules/${ZBAR_WASM_PKG_NAME}/dist/zbar.wasm`,
             '/media': '/base/tests/media',
+            '/unit': '/base/tests/unit',
         },
 
         // Excluded files
@@ -48,7 +49,7 @@ module.exports = function(config) {
 
         // Files to preprocess before being served (including required() files)
         preprocessors: {
-            'tests/unit/**/*.spec.*': ['rollup'],
+            'tests/unit/**/*.js': ['rollup'],
         },
 
         rollupPreprocessor: {
@@ -145,7 +146,7 @@ module.exports = function(config) {
         ],
 
         // Number of browsers to be launched simultaneously
-        concurrency: 5,
+        concurrency: 1,
 
         // Exit after running the tests
         singleRun: true,
