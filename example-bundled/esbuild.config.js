@@ -9,6 +9,7 @@ const options = {
     outfile: '../docs/example-bundled/js/main.js',
     format: 'esm',
     target: 'es2020',
+    platform: 'node',  // required although building for browsers
     minify: true,
     sourcemap: false,
     plugins: [
