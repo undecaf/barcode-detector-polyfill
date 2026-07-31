@@ -8,15 +8,15 @@ import {ZBarConfigType, ZBarScanner, ZBarSymbolType} from '@undecaf/zbar-wasm'
 export class ScannerConfig {
 
     /** Maps {@link external:BarcodeDetector} format names to {@link ScannerConfig}s */
-    private static formatsToConfigs: Record<string, ScannerConfig> = {}
+    static #formatsToConfigs: Record<string, ScannerConfig> = {}
 
     /** Maps {@link ZBarSymbolType}s to format names */
-    private static typesToFormats: Record<number, string> = {}
+    static #typesToFormats: Record<number, string> = {}
 
-    private readonly symbolType: ZBarSymbolType
-    private readonly configType: ZBarConfigType
-    private readonly number: number
-    private readonly configSteps: Array<ScannerConfig>
+    #symbolType: ZBarSymbolType
+    #configType: ZBarConfigType
+    #number: number
+    #configSteps: Array<ScannerConfig>
 
 
     constructor(
@@ -24,10 +24,10 @@ export class ScannerConfig {
         configType: ZBarConfigType = ZBarConfigType.ZBAR_CFG_ENABLE,
         number: number = 1
     ) {
-        this.symbolType = symbolType
-        this.configType = configType
-        this.number = number
-        this.configSteps = [this]
+        this.#symbolType = symbolType
+        this.#configType = configType
+        this.#number = number
+        this.#configSteps = [this]
     }
 
 
@@ -39,15 +39,15 @@ export class ScannerConfig {
     static register(
         format: string,
         config: ScannerConfig,
-        type: number = config.symbolType
+        type: number = config.#symbolType
     ): ScannerConfig {
 
-        ScannerConfig.formatsToConfigs[format] = config
+        ScannerConfig.#formatsToConfigs[format] = config
 
         // Map each ZBarSymbolType to the name of the first format that
         // contains it. This requires composite formats to be defined
         // *after* the formats of which they consist.
-        ScannerConfig.typesToFormats[type] = ScannerConfig.typesToFormats[type] || format
+        ScannerConfig.#typesToFormats[type] = ScannerConfig.#typesToFormats[type] || format
 
         return config
     }
@@ -57,7 +57,7 @@ export class ScannerConfig {
      * Returns the format names of the registered {@link ZBarScanner} configurations.
      */
     static formats(): Array<string> {
-        return Object.keys(ScannerConfig.formatsToConfigs)
+        return Object.keys(ScannerConfig.#formatsToConfigs)
     }
 
 
@@ -65,7 +65,7 @@ export class ScannerConfig {
      * Returns the barcode format name associated with a {@link ZBarSymbolType}.
      */
     static toFormat(type: ZBarSymbolType): string {
-        return ScannerConfig.typesToFormats[type]
+        return ScannerConfig.#typesToFormats[type]
     }
 
 
@@ -73,7 +73,11 @@ export class ScannerConfig {
      * Configures an {@link ZBarScanner} to detect barcodes with the specified format.
      */
     static configure(scanner: ZBarScanner, format: string) {
-        ScannerConfig.formatsToConfigs[format]?.configSteps.forEach(c => scanner.setConfig(c.symbolType, c.configType, c.number))
+        const config = ScannerConfig.#formatsToConfigs[format]
+
+        if (config) {
+            config.#configSteps.forEach(c => scanner.setConfig(c.#symbolType, c.#configType, c.#number))
+        }
     }
 
 
@@ -81,7 +85,7 @@ export class ScannerConfig {
      * Adds a configuration step to this configuration.
      */
     add(config: ScannerConfig): ScannerConfig {
-        this.configSteps.push(config)
+        this.#configSteps.push(config)
         return this
     }
 }

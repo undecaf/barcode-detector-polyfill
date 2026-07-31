@@ -29,11 +29,11 @@ type PolyfillImageBitmapSource =
  */
 export class BarcodeDetectorPolyfill {
 
-    private readonly formats: Array<string>
-    private readonly zbarConfig: ZBarConfig
+    #formats: Array<string>
+    #zbarConfig: ZBarConfig
 
-    private canvas?: Canvas
-    private scanner?: ZBarScanner
+    #canvas?: Canvas
+    #scanner?: ZBarScanner
 
 
     /**
@@ -56,8 +56,8 @@ export class BarcodeDetectorPolyfill {
             }
         }
 
-        this.formats = options.formats || ScannerConfig.formats()
-        this.zbarConfig = options.zbar || new ZBarConfig()
+        this.#formats = options.formats || ScannerConfig.formats()
+        this.#zbarConfig = options.zbar || new ZBarConfig()
     }
 
 
@@ -83,11 +83,11 @@ export class BarcodeDetectorPolyfill {
     // TODO Enable cache for video source, disable for others unless overridden in zbarConfig
     detect(source: PolyfillImageBitmapSource): Promise<Array<DetectedBarcode>> {
         // Validate the argument type and state
-        BarcodeDetectorPolyfill.validate(source)
+        BarcodeDetectorPolyfill.#validate(source)
 
         // Return an empty array immediately if the source is an object with any zero dimension,
         // see https://wicg.github.io/shape-detection-api/#image-sources-for-detection
-        const intrinsic = BarcodeDetectorPolyfill.intrinsicDimensions(source)
+        const intrinsic = BarcodeDetectorPolyfill.#intrinsicDimensions(source)
         if ((intrinsic.width === 0) || (intrinsic.height === 0)) {
             return Promise.resolve([])
 
@@ -95,8 +95,8 @@ export class BarcodeDetectorPolyfill {
             try {
                 return Promise
                     .all([
-                        this.toImageData(source),
-                        this.getScanner()
+                        this.#toImageData(source),
+                        this.#getScanner()
                     ])
 
                     .then(fulfilled => {
@@ -105,8 +105,8 @@ export class BarcodeDetectorPolyfill {
                             scanner: ZBarScanner = fulfilled[1];
 
                         // Configure the image cache if so requested
-                        if (typeof this.zbarConfig.enableCache !== 'undefined') {
-                            scanner.enableCache(this.zbarConfig.enableCache)
+                        if (typeof this.#zbarConfig.enableCache !== 'undefined') {
+                            scanner.enableCache(this.#zbarConfig.enableCache)
                         }
 
                         return scanRGBABuffer(imageData.data, imageData.width, imageData.height, scanner)
@@ -114,7 +114,7 @@ export class BarcodeDetectorPolyfill {
 
                     .then(symbols => {
                         return symbols.map(symbol =>
-                            this.toBarcodeDetectorResult(symbol)
+                            this.#toBarcodeDetectorResult(symbol)
                         )
                     })
 
@@ -129,22 +129,22 @@ export class BarcodeDetectorPolyfill {
     /**
      * Returns an {@link ZBarScanner} configured for the requested barcode formats.
      */
-    private getScanner(): Promise<ZBarScanner> {
+    #getScanner(): Promise<ZBarScanner> {
         return new Promise<ZBarScanner>(async (resolve, reject) => {
-            if (!this.scanner) {
+            if (!this.#scanner) {
                 const scanner = await getDefaultScanner()
 
                 // Configure the scanner for the requested formats
-                if (this.formats.length > 0) {
+                if (this.#formats.length > 0) {
                     // Must reset the default configuration first
                     scanner.setConfig(ZBarSymbolType.ZBAR_NONE, ZBarConfigType.ZBAR_CFG_ENABLE, 0)
-                    this.formats.forEach(f => ScannerConfig.configure(scanner, f))
+                    this.#formats.forEach(f => ScannerConfig.configure(scanner, f))
                 }
 
-                this.scanner = scanner
+                this.#scanner = scanner
             }
 
-            resolve(this.scanner)
+            resolve(this.#scanner)
         })
     }
 
@@ -152,19 +152,19 @@ export class BarcodeDetectorPolyfill {
     /**
      * Converts any {@link PolyfillImageBitmapSource} to an {@link ImageData} instance.
      */
-    private toImageData(source: PolyfillImageBitmapSource): Promise<ImageData> {
+    #toImageData(source: PolyfillImageBitmapSource): Promise<ImageData> {
 
         const canvasToImageData = (src: CanvasImageSourceWebCodecs): ImageData => {
             // Draw on the canvas in the natural size of the source
-            const intrinsic = BarcodeDetectorPolyfill.intrinsicDimensions(src)
+            const intrinsic = BarcodeDetectorPolyfill.#intrinsicDimensions(src)
 
             // Create a new canvas if the dimensions have changed
-            if (!this.canvas || (this.canvas.width !== intrinsic.width) || (this.canvas.height !== intrinsic.height)) {
-                this.canvas = newCanvas(intrinsic.width, intrinsic.height)
+            if (!this.#canvas || (this.#canvas.width !== intrinsic.width) || (this.#canvas.height !== intrinsic.height)) {
+                this.#canvas = newCanvas(intrinsic.width, intrinsic.height)
             }
 
             const
-                canvas = this.canvas,
+                canvas = this.#canvas,
                 context = canvas.getContext('2d');
 
             context!.drawImage(src, 0, 0)
@@ -191,7 +191,7 @@ export class BarcodeDetectorPolyfill {
                     .finally(() => URL.revokeObjectURL(image.src))
             }
 
-        } else if (BarcodeDetectorPolyfill.isRenderingContext(source)) {
+        } else if (BarcodeDetectorPolyfill.#isRenderingContext(source)) {
             return Promise.resolve(source.getImageData(0, 0, source.canvas.width, source.canvas.height))
 
         } else {
@@ -203,7 +203,7 @@ export class BarcodeDetectorPolyfill {
     /**
      * Converts a ZBar {@link ZBarSymbol} to a {@link DetectedBarcode}.
      */
-    private toBarcodeDetectorResult(symbol: ZBarSymbol): DetectedBarcode {
+    #toBarcodeDetectorResult(symbol: ZBarSymbol): DetectedBarcode {
         // Determine a bounding box that contains all points
         const bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity }
 
@@ -217,7 +217,7 @@ export class BarcodeDetectorPolyfill {
 
         const barcode: DetectedBarcode = {
             format: ScannerConfig.toFormat(symbol.type),
-            rawValue: symbol.decode(this.zbarConfig.encoding),
+            rawValue: symbol.decode(this.#zbarConfig.encoding),
             orientation: symbol.orientation as number,
             quality: symbol.quality,
 
@@ -249,9 +249,9 @@ export class BarcodeDetectorPolyfill {
      * @throws {TypeError} if the argument is not an {@link PolyfillImageBitmapSource}
      * @throws {DOMException} if the argument is in an invalid state for detection
      */
-    private static validate(source: any): source is PolyfillImageBitmapSource {
+    static #validate(source: any): source is PolyfillImageBitmapSource {
         // The argument must be a `PolyfillImageBitmapSource`
-        if (!BarcodeDetectorPolyfill.isPolyfillImageBitmapSource(source)) {
+        if (!BarcodeDetectorPolyfill.#isPolyfillImageBitmapSource(source)) {
             throw new TypeError('BarcodeDetector.detect() argument is not an ImageBitmapSource')
         }
 
@@ -275,7 +275,7 @@ export class BarcodeDetectorPolyfill {
      * Type guard for {@link external:CanvasRenderingContext2D}
      * and {@link external:OffscreenCanvasRenderingContext2D}.
      */
-    private static isRenderingContext(source: any): source is CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D {
+    static #isRenderingContext(source: any): source is CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D {
         return (typeof CanvasRenderingContext2D !== 'undefined' && source instanceof CanvasRenderingContext2D)
             || (typeof OffscreenCanvasRenderingContext2D !== 'undefined' && source instanceof OffscreenCanvasRenderingContext2D)
     }
@@ -284,7 +284,7 @@ export class BarcodeDetectorPolyfill {
     /**
      * Type guard for type {@link PolyfillImageBitmapSource}.
      */
-    private static isPolyfillImageBitmapSource(source: any): source is PolyfillImageBitmapSource {
+    static #isPolyfillImageBitmapSource(source: any): source is PolyfillImageBitmapSource {
         return (typeof HTMLImageElement !== 'undefined' && source instanceof HTMLImageElement)
             || (typeof HTMLVideoElement !== 'undefined' && source instanceof HTMLVideoElement)
             || (typeof HTMLCanvasElement !== 'undefined' && source instanceof HTMLCanvasElement)
@@ -292,7 +292,7 @@ export class BarcodeDetectorPolyfill {
             || (typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap)
             || (typeof OffscreenCanvas !== 'undefined' && source instanceof OffscreenCanvas)
             || (typeof VideoFrame !== 'undefined' && source instanceof VideoFrame)
-            || BarcodeDetectorPolyfill.isRenderingContext(source)
+            || BarcodeDetectorPolyfill.#isRenderingContext(source)
             || (source instanceof ImageData)
             || (source instanceof Blob)
             // Note the (lenient) equality operator
@@ -304,8 +304,8 @@ export class BarcodeDetectorPolyfill {
      * Returns the intrinsic (as opposed to the rendered) dimensions
      * of a {@link external:CanvasImageSourceWebCodecs} object.
      */
-    private static intrinsicDimensions(source: PolyfillImageBitmapSource): { width: number, height: number } {
-        if (BarcodeDetectorPolyfill.isRenderingContext(source)) {
+    static #intrinsicDimensions(source: PolyfillImageBitmapSource): { width: number, height: number } {
+        if (BarcodeDetectorPolyfill.#isRenderingContext(source)) {
             source = source.canvas
         }
 
