@@ -17,7 +17,7 @@ It offers the following features:
   `ean_8`, `ean_13`, `ean_13+2`, `ean_13+5`, `isbn_10`, `isbn_13`, `isbn_13+2`, `isbn_13+5`, `itf`,
   `qr_code`, `sq_code`, `upc_a`, `upc_e`
 + Not supported: `aztec`, `data_matrix`, `pdf417`
-+ Scans `<img>`, `<canvas>` and live `<video>` elements, image and video `Blob`s and `File`s and more
++ Scans `<img>`, `<canvas>` and live `<video>` elements, `OffscreenCanvas`, image and video `Blob`s and `File`s and more
 + Can be used in [Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
 + Detects multiple barcodes per frame, also with different types
 + Barcodes may be oriented horizontally or vertically
@@ -65,7 +65,7 @@ Import the `BarcodeDetectorPolyfill` API:
 
 ```html
 <script type="module">
-    import { BarcodeDetectorPolyfill } from "https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.23/dist/main.js";
+    import { BarcodeDetectorPolyfill } from "https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.24/dist/main.js";
 
     try {
         window['BarcodeDetector'].getSupportedFormats()
@@ -86,7 +86,7 @@ Expose the `BarcodeDetectorPolyfill` API in variable `barcodeDetectorPolyfill`:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.23/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.24/dist/index.js"></script>
 <script>
     try {
         window['BarcodeDetector'].getSupportedFormats()
@@ -148,7 +148,7 @@ will be thrown:
 + an `<img>` element ([`HTMLImageElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement)),
   must be completely loaded, or else a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException)
   will be thrown as `InvalidStateError`
-+ a SVG `<image>` element ([`SVGImageElement`](https://developer.mozilla.org/en-US/docs/Web/API/SVGImageElement))
++ an SVG `<image>` element ([`SVGImageElement`](https://developer.mozilla.org/en-US/docs/Web/API/SVGImageElement))
 + a `<canvas>` element ([`HTMLCanvasElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement))
 + a [`CanvasRenderingContext2D`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D)
 + an [`OffscreenCanvas`](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) ①
@@ -161,10 +161,9 @@ will be thrown:
 + an [`ImageData`](https://developer.mozilla.org/en-US/docs/Web/API/ImageData) instance ①
 + a [`Blob`](https://developer.mozilla.org/en-US/docs/Web/API/Blob) or a 
   [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) with a content `type` of `image/*` ①
++ any object with a zero `width` or `height` property ①
 
 ① Also available in Web Workers
-
-In addition, any object with a zero `width` or `height` property will be tolerated.
 
 The detector processes the `source` in natural size, making detection results independent of the size rendered
 by the browser.
